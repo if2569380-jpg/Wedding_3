@@ -23,7 +23,7 @@ import {
   LogOut,
   Search
 } from 'lucide-react';
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -267,6 +267,8 @@ export default function GalleryPage() {
     );
     return [...new Set([...categories, ...photoNames])].slice(0, 8);
   }, [searchQuery, photos]);
+
+  const filteredPhotos = photos.filter((photo) => {
     const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
     const matchesSearch = searchQuery === '' || 
       photo.alt.toLowerCase().includes(searchQuery.toLowerCase()) ||
