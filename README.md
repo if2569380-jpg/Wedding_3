@@ -8,11 +8,10 @@ This project includes:
 
 - A public landing page at `/`
 - Protected gallery at `/gallery` (login required)
-- Protected admin panel at `/admin` for:
-- Uploading photos
-- Editing and deleting photos
-- Managing gallery settings
-- Managing background music (local files or YouTube links)
+- Protected admin panel at `/admin`
+- Photo upload, edit, and delete workflows
+- Gallery settings management
+- Music management (local files and YouTube links)
 - Global floating music player powered by `/api/music`
 
 Authentication and data/storage are handled with Supabase.
@@ -69,10 +68,10 @@ Currently not used by this codebase:
 
 1. Create a storage bucket named `gallery` (recommended: **private**).
 2. Run SQL migrations in this order:
-- `supabase/migrations/001_create_gallery_images.sql`
-- `supabase/migrations/002_create_gallery_settings.sql`
-- `supabase/migrations/003_create_songs.sql`
-- `supabase/migrations/004_add_source_type_to_songs.sql`
+   - `supabase/migrations/001_create_gallery_images.sql`
+   - `supabase/migrations/002_create_gallery_settings.sql`
+   - `supabase/migrations/003_create_songs.sql`
+   - `supabase/migrations/004_add_source_type_to_songs.sql`
 3. In Supabase Auth, create users manually (email/password), since there is no sign-up page in this app.
 
 ## Run Locally

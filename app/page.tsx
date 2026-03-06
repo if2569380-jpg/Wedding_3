@@ -556,6 +556,12 @@ const WEDDING_SECTIONS = [
   }
 ];
 
+const STORY_SECTION_ANCHORS: Record<number, string> = {
+  0: 'about',
+  1: 'services',
+  2: 'portfolio',
+};
+
 function Sparkles({ className }: { className?: string }) {
   return (
     <svg 
@@ -696,7 +702,8 @@ export default function Home() {
         {WEDDING_SECTIONS.map((section, index) => (
           <section
             key={section.id || section.title}
-            className={`sticky top-0 h-screen w-full flex items-center justify-center p-4 md:p-12 ${section.color} ${section.textColor} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}
+            id={STORY_SECTION_ANCHORS[index]}
+            className={`sticky top-0 scroll-mt-24 h-screen w-full flex items-center justify-center p-4 md:p-12 ${section.color} ${section.textColor} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}
             style={{ 
               zIndex: index + 1,
             }}
@@ -767,7 +774,7 @@ export default function Home() {
       </div>
 
       {/* Final Section */}
-      <section className="h-screen flex flex-col items-center justify-center bg-[#1a1a1a] text-white p-8 text-center relative z-50">
+      <section id="contact" className="scroll-mt-24 h-screen flex flex-col items-center justify-center bg-[#1a1a1a] text-white p-8 text-center relative z-50">
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
