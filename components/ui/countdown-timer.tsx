@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useAnimate } from 'framer-motion';
+import { useAnimate } from 'motion/react';
 
 import { cn } from '@/lib/utils';
 

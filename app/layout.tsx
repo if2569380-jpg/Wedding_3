@@ -1,8 +1,6 @@
 import type {Metadata} from 'next';
 import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
-import { BackgroundMusic } from '@/components/BackgroundMusic';
-import { GallerySettingsProvider } from './providers';
 import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
@@ -25,10 +23,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
       <body suppressHydrationWarning className="font-serif">
-        <GallerySettingsProvider>
-          {children}
-        </GallerySettingsProvider>
-        <BackgroundMusic />
+        {children}
         <Analytics />
       </body>
     </html>

@@ -9,7 +9,7 @@ export async function GET() {
 
     const { data: settings, error } = await supabase
       .from('gallery_settings')
-      .select('*')
+      .select('key, value')
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
@@ -21,7 +21,14 @@ export async function GET() {
       return acc
     }, {} as Record<string, any>)
 
-    return NextResponse.json({ settings: settingsObject })
+    return NextResponse.json(
+      { settings: settingsObject },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        },
+      }
+    )
   } catch (error) {
     console.error('Settings fetch error:', error)
     return NextResponse.json(
@@ -48,35 +55,24 @@ export async function POST(request: NextRequest) {
 
     const updates = await request.json()
 
-    // Update each setting
-    const results = await Promise.all(
-      Object.entries(updates).map(async ([key, value]) => {
-        const { data, error } = await adminClient
-          .from('gallery_settings')
-          .upsert(
-            { key, value },
-            { onConflict: 'key' }
-          )
-          .select()
-          .single()
+    const payload = Object.entries(updates).map(([key, value]) => ({ key, value }))
 
-        if (error) {
-          console.error(`Error updating setting ${key}:`, error)
-          return { key, error: error.message }
-        }
-        return { key, success: true }
-      })
-    )
+    if (payload.length === 0) {
+      return NextResponse.json({ success: true, updated: 0 })
+    }
 
-    const errors = results.filter(r => r.error)
-    if (errors.length > 0) {
+    const { error: upsertError } = await adminClient
+      .from('gallery_settings')
+      .upsert(payload, { onConflict: 'key' })
+
+    if (upsertError) {
       return NextResponse.json(
-        { error: 'Some settings failed to update', details: errors },
+        { error: 'Failed to update settings', details: upsertError.message },
         { status: 500 }
       )
     }
 
-    return NextResponse.json({ success: true, updated: results.length })
+    return NextResponse.json({ success: true, updated: payload.length })
   } catch (error) {
     console.error('Settings update error:', error)
     return NextResponse.json(

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   X, 
   ChevronLeft, 
@@ -31,20 +31,32 @@ import { createClient } from '@/lib/supabaseBrowser';
 import { useGallerySettings } from '@/app/providers';
 import WelcomeBanner from '@/components/WelcomeBanner';
 
-interface GalleryImage {
+interface GalleryImageThumb {
   id: string;
   src: string;
-  full_src: string;
   alt: string;
   category: string;
   created_at: string;
+}
+
+interface GalleryImageFull {
+  id: string;
+  full_src: string;
+  expires_at: string;
+}
+
+interface GalleryApiResponse {
+  images: GalleryImageThumb[];
+  nextCursor: string | null;
+  hasMore: boolean;
+  total: number;
 }
 
 const CATEGORIES = ['All', 'Ceremony', 'Reception', 'Portraits', 'Details'];
 
 // 3D Tilt Photo Card Component
 interface PhotoCardProps {
-  photo: GalleryImage;
+  photo: GalleryImageThumb;
   index: number;
   viewMode: 'masonry' | 'grid';
   showWatermark: boolean;
@@ -104,7 +116,7 @@ function PhotoCard({ photo, index, viewMode, showWatermark, watermarkText, favor
           viewMode === 'grid' ? 'h-full' : 'h-auto'
         }`}
         referrerPolicy="no-referrer"
-        unoptimized
+        sizes={viewMode === 'grid' ? '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw' : '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw'}
       />
 
       {showWatermark && (
@@ -157,7 +169,10 @@ function PhotoSkeleton({ viewMode }: { viewMode: 'masonry' | 'grid' }) {
 
 export default function GalleryPage() {
   const { settings } = useGallerySettings();
-  const [photos, setPhotos] = useState<GalleryImage[]>([]);
+  const [photos, setPhotos] = useState<GalleryImageThumb[]>([]);
+  const [totalPhotos, setTotalPhotos] = useState(0);
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -175,8 +190,8 @@ export default function GalleryPage() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(20);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [fullImageCache, setFullImageCache] = useState<Record<string, GalleryImageFull>>({});
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const slideshowRef = useRef<NodeJS.Timeout | null>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
@@ -218,29 +233,6 @@ export default function GalleryPage() {
     fetchFamilyMember();
   }, []);
 
-  // Fetch photos from Supabase
-  useEffect(() => {
-    async function fetchPhotos() {
-      try {
-        setLoading(true);
-        const response = await fetch('/api/gallery');
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch photos');
-        }
-        
-        setPhotos(data.images || []);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load gallery');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchPhotos();
-  }, []);
-
   // Load favorites from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('gallery-favorites');
@@ -268,26 +260,63 @@ export default function GalleryPage() {
     return [...new Set([...categories, ...photoNames])].slice(0, 8);
   }, [searchQuery, photos]);
 
-  const filteredPhotos = photos.filter((photo) => {
-    const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
-    const matchesSearch = searchQuery === '' || 
-      photo.alt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      photo.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
-  });
   const parsedItemsPerPage = Number(settings.items_per_page);
   const itemsPerPage = Number.isFinite(parsedItemsPerPage) && parsedItemsPerPage > 0
     ? Math.floor(parsedItemsPerPage)
     : 20;
-  const visiblePhotos = filteredPhotos.slice(0, visibleCount);
-  const canLoadMore = visibleCount < filteredPhotos.length;
-  const displayedCount = Math.min(visibleCount, filteredPhotos.length);
+  const filteredPhotos = photos;
+  const displayedCount = filteredPhotos.length;
+  const totalCount = totalPhotos > 0 ? totalPhotos : filteredPhotos.length;
+  const canLoadMore = hasMore && nextCursor !== null;
   const watermarkText = String(settings.watermark_text || settings.gallery_title).trim();
   const showWatermark = settings.watermark_enabled && watermarkText.length > 0;
 
+  const loadPhotos = useCallback(async (cursor: string | null, mode: 'replace' | 'append') => {
+    try {
+      if (mode === 'replace') {
+        setLoading(true);
+        setError(null);
+      }
+
+      const params = new URLSearchParams();
+      params.set('limit', String(itemsPerPage));
+      if (cursor) params.set('cursor', cursor);
+      if (selectedCategory !== 'All') params.set('category', selectedCategory);
+      const trimmedQuery = searchQuery.trim();
+      if (trimmedQuery) params.set('q', trimmedQuery);
+
+      const response = await fetch(`/api/gallery?${params.toString()}`);
+      const data: GalleryApiResponse & { error?: string } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch photos');
+      }
+
+      if (mode === 'replace') {
+        setPhotos(data.images || []);
+      } else {
+        setPhotos((prev) => [...prev, ...(data.images || [])]);
+      }
+
+      setNextCursor(data.nextCursor ?? null);
+      setHasMore(Boolean(data.hasMore));
+      setTotalPhotos(Number.isFinite(data.total) ? data.total : 0);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load gallery');
+    } finally {
+      if (mode === 'replace') {
+        setLoading(false);
+      }
+    }
+  }, [itemsPerPage, searchQuery, selectedCategory]);
+
   useEffect(() => {
-    setVisibleCount(itemsPerPage);
-  }, [itemsPerPage, selectedCategory, photos.length]);
+    const timeoutId = setTimeout(() => {
+      void loadPhotos(null, 'replace');
+    }, 250);
+
+    return () => clearTimeout(timeoutId);
+  }, [loadPhotos]);
 
   // Infinite scroll with Intersection Observer
   useEffect(() => {
@@ -295,13 +324,11 @@ export default function GalleryPage() {
     
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && canLoadMore && !loadingMore) {
+        if (entries[0].isIntersecting && canLoadMore && !loadingMore && nextCursor) {
           setLoadingMore(true);
-          // Simulate slight delay for smooth loading
-          setTimeout(() => {
-            setVisibleCount((prev) => prev + itemsPerPage);
+          void loadPhotos(nextCursor, 'append').finally(() => {
             setLoadingMore(false);
-          }, 300);
+          });
         }
       },
       { rootMargin: '100px', threshold: 0.1 }
@@ -309,7 +336,7 @@ export default function GalleryPage() {
 
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [canLoadMore, loadingMore, itemsPerPage]);
+  }, [canLoadMore, loadPhotos, loadingMore, nextCursor]);
 
   useEffect(() => {
     if (selectedPhoto === null) return;
@@ -319,6 +346,51 @@ export default function GalleryPage() {
       document.body.style.overflow = 'unset';
     }
   }, [filteredPhotos.length, selectedPhoto]);
+
+  const getCachedFullImageUrl = useCallback((photo: GalleryImageThumb): string | null => {
+    const cached = fullImageCache[photo.id];
+    if (!cached) return null;
+
+    const expiry = new Date(cached.expires_at).getTime();
+    if (Number.isFinite(expiry) && expiry > Date.now() + 60_000) {
+      return cached.full_src;
+    }
+
+    return null;
+  }, [fullImageCache]);
+
+  const ensureFullImageUrl = useCallback(async (photo: GalleryImageThumb): Promise<string> => {
+    const cachedUrl = getCachedFullImageUrl(photo);
+    if (cachedUrl) return cachedUrl;
+
+    try {
+      const response = await fetch(`/api/gallery/full-url?id=${photo.id}`);
+      const data: GalleryImageFull & { error?: string } = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load full image');
+      }
+
+      const fullImage: GalleryImageFull = {
+        id: data.id,
+        full_src: data.full_src,
+        expires_at: data.expires_at,
+      };
+
+      setFullImageCache((prev) => ({ ...prev, [photo.id]: fullImage }));
+      return fullImage.full_src;
+    } catch {
+      return photo.src;
+    }
+  }, [getCachedFullImageUrl]);
+
+  useEffect(() => {
+    if (selectedPhoto === null) return;
+    const photo = filteredPhotos[selectedPhoto];
+    if (!photo) return;
+
+    void ensureFullImageUrl(photo);
+  }, [ensureFullImageUrl, filteredPhotos, selectedPhoto]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -385,7 +457,12 @@ export default function GalleryPage() {
     setZoomLevel(1);
     setPanPosition({ x: 0, y: 0 });
     document.body.style.overflow = 'hidden';
-  }, []);
+
+    const photo = filteredPhotos[index];
+    if (photo) {
+      void ensureFullImageUrl(photo);
+    }
+  }, [ensureFullImageUrl, filteredPhotos]);
 
   const closeLightbox = useCallback(() => {
     setSelectedPhoto(null);
@@ -398,19 +475,29 @@ export default function GalleryPage() {
 
   const goToPrevious = useCallback(() => {
     if (selectedPhoto !== null) {
-      setSelectedPhoto(selectedPhoto === 0 ? filteredPhotos.length - 1 : selectedPhoto - 1);
+      const nextIndex = selectedPhoto === 0 ? filteredPhotos.length - 1 : selectedPhoto - 1;
+      setSelectedPhoto(nextIndex);
       setZoomLevel(1);
       setPanPosition({ x: 0, y: 0 });
+      const photo = filteredPhotos[nextIndex];
+      if (photo) {
+        void ensureFullImageUrl(photo);
+      }
     }
-  }, [selectedPhoto, filteredPhotos.length]);
+  }, [ensureFullImageUrl, filteredPhotos, selectedPhoto]);
 
   const goToNext = useCallback(() => {
     if (selectedPhoto !== null) {
-      setSelectedPhoto(selectedPhoto === filteredPhotos.length - 1 ? 0 : selectedPhoto + 1);
+      const nextIndex = selectedPhoto === filteredPhotos.length - 1 ? 0 : selectedPhoto + 1;
+      setSelectedPhoto(nextIndex);
       setZoomLevel(1);
       setPanPosition({ x: 0, y: 0 });
+      const photo = filteredPhotos[nextIndex];
+      if (photo) {
+        void ensureFullImageUrl(photo);
+      }
     }
-  }, [selectedPhoto, filteredPhotos.length]);
+  }, [ensureFullImageUrl, filteredPhotos, selectedPhoto]);
 
   // Zoom functionality
   const handleZoomIn = useCallback(() => {
@@ -436,8 +523,11 @@ export default function GalleryPage() {
   const handleDownload = useCallback(async () => {
     if (selectedPhoto === null) return;
     const photo = filteredPhotos[selectedPhoto];
+    if (!photo) return;
+    const fullImageUrl = await ensureFullImageUrl(photo);
+
     try {
-      const res = await fetch(photo.full_src, { mode: 'cors' });
+      const res = await fetch(fullImageUrl, { mode: 'cors' });
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -447,9 +537,9 @@ export default function GalleryPage() {
       URL.revokeObjectURL(url);
     } catch {
       // Fallback: open in new tab for user to save
-      window.open(photo.full_src, '_blank');
+      window.open(fullImageUrl, '_blank');
     }
-  }, [selectedPhoto, filteredPhotos]);
+  }, [ensureFullImageUrl, selectedPhoto, filteredPhotos]);
 
   // Share: copy link
   const shareUrl = typeof window !== 'undefined'
@@ -694,7 +784,7 @@ export default function GalleryPage() {
             
             {settings.show_photo_count && (
               <span className="text-stone-500 font-sans text-sm">
-                • {displayedCount} of {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
+                • {displayedCount} of {totalCount} photo{totalCount !== 1 ? 's' : ''}
               </span>
             )}
           </div>
@@ -738,7 +828,7 @@ export default function GalleryPage() {
               }
             >
               <AnimatePresence mode="popLayout">
-                {visiblePhotos.map((photo, index) => (
+                {filteredPhotos.map((photo, index) => (
                   <PhotoCard
                     key={photo.id}
                     photo={photo}
@@ -957,15 +1047,14 @@ export default function GalleryPage() {
                 onMouseLeave={handleMouseUp}
               >
                 <Image
-                  src={filteredPhotos[selectedPhoto].full_src}
+                  src={getCachedFullImageUrl(filteredPhotos[selectedPhoto]) ?? filteredPhotos[selectedPhoto].src}
                   alt={filteredPhotos[selectedPhoto].alt}
                   width={1200}
                   height={1600}
                   className="max-w-full max-h-[70vh] object-contain rounded-lg select-none"
                   referrerPolicy="no-referrer"
-                  priority
                   draggable={false}
-                  unoptimized
+                  sizes="(max-width: 768px) 95vw, 80vw"
                 />
                 {showWatermark && (
                   <div className="absolute inset-0 pointer-events-none flex items-end justify-end p-4 md:p-6">
@@ -1015,6 +1104,7 @@ export default function GalleryPage() {
                     setSelectedPhoto(index);
                     setZoomLevel(1);
                     setPanPosition({ x: 0, y: 0 });
+                    void ensureFullImageUrl(photo);
                   }}
                   className={`flex-shrink-0 w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden transition-all border-2 ${
                     selectedPhoto === index
@@ -1029,7 +1119,7 @@ export default function GalleryPage() {
                     height={64}
                     className="w-full h-full object-cover"
                     referrerPolicy="no-referrer"
-                    unoptimized
+                    sizes="64px"
                   />
                 </button>
               ))}

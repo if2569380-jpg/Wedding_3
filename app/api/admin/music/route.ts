@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabaseAdmin';
 import { createClient as createServerClient } from '@/lib/supabaseServer';
 
-export const dynamic = 'force-dynamic';
-
 // GET all songs (including inactive - for admin)
 export async function GET() {
   try {
@@ -21,7 +19,7 @@ export async function GET() {
 
     const { data: songs, error } = await adminClient
       .from('songs')
-      .select('*')
+      .select('id, title, artist, src, is_active, display_order, source_type, created_at')
       .order('display_order', { ascending: true });
 
     if (error) {
@@ -75,7 +73,7 @@ export async function POST(request: Request) {
         display_order: display_order ?? 0,
         source_type: finalSourceType,
       })
-      .select()
+      .select('id, title, artist, src, is_active, display_order, source_type, created_at')
       .single();
 
     if (error) {

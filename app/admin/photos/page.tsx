@@ -84,7 +84,7 @@ export default function PhotosPage() {
   async function fetchPhotos() {
     try {
       setLoading(true)
-      const response = await fetch('/api/gallery')
+      const response = await fetch('/api/gallery?include_full=true')
       const data = await response.json()
 
       if (!response.ok) {

@@ -99,9 +99,11 @@ Currently not used by this codebase:
 
 ## API Endpoints
 
-- `GET /api/gallery` - list gallery images with signed URLs
+- `GET /api/gallery` - list gallery images (thumbnail-first, cursor pagination, supports filters)
+- `GET /api/gallery/full-url?id=<id>` - get signed full-resolution URL for a single image
 - `GET /api/gallery/settings` - fetch gallery settings
 - `POST /api/gallery/settings` - update settings (auth required)
+- `GET /api/admin/gallery-stats` - lightweight dashboard stats (auth required)
 - `POST /api/admin/upload` - upload image + insert metadata (auth required)
 - `PATCH /api/admin/photos` - edit photo metadata (auth required)
 - `DELETE /api/admin/photos?id=<id>` - delete photo + storage files (auth required)

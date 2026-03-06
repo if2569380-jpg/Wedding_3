@@ -6,6 +6,7 @@ import Image from 'next/image'
 import { motion } from 'motion/react'
 import { Heart } from 'lucide-react'
 import Link from 'next/link'
+import { HERO_IMAGE_URL } from '@/lib/heroImage'
 
 const LoginForm = dynamic(() => import('./LoginForm'), {
   ssr: false,
@@ -63,11 +64,10 @@ export default function LoginPage() {
           className="absolute inset-0"
         >
           <Image
-            src="https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/hero-image-1772817907417.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvaGVyby1pbWFnZS0xNzcyODE3OTA3NDE3LmpmaWYiLCJpYXQiOjE3NzI4MTc5MjAsImV4cCI6MTc3MjgyMTUyMH0.QD33c9HjVHFSkuCmKbn6kWksl0AxxruJoLQRjroLk_4"
+            src={HERO_IMAGE_URL}
             alt="Wedding couple"
             fill
             className="object-cover"
-            priority
             referrerPolicy="no-referrer"
           />
         </motion.div>

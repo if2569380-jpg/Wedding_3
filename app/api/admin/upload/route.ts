@@ -88,14 +88,10 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get public URLs
+    // Keep thumbnails public for fast delivery and keep full files private (signed on demand).
     const { data: { publicUrl: thumbnailUrl } } = adminClient.storage
       .from(bucketName)
       .getPublicUrl(thumbnailPath)
-
-    const { data: { publicUrl: fullUrl } } = adminClient.storage
-      .from(bucketName)
-      .getPublicUrl(fullPath)
 
     // Save metadata to database
     const { data: imageData, error: dbError } = await supabase
@@ -103,7 +99,7 @@ export async function POST(request: NextRequest) {
       .insert([
         {
           src: thumbnailUrl,
-          full_src: fullUrl,
+          full_src: fullPath,
           alt: title,
           category: category,
         },

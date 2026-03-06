@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import {
   ImageIcon,
-  Users,
   Eye,
   TrendingUp,
   Heart,
@@ -32,22 +31,19 @@ export default function AdminDashboard() {
   useEffect(() => {
     async function fetchStats() {
       try {
-        const response = await fetch('/api/gallery')
+        const response = await fetch('/api/admin/gallery-stats')
         const data = await response.json()
-        
-        if (data.images) {
-          const images = data.images
-          setStats({
-            totalPhotos: images.length,
-            categories: CATEGORIES.length,
-            favorites: 0, // Would need to fetch from user data
-            recentUploads: images.filter((img: { created_at: string }) => {
-              const uploadDate = new Date(img.created_at)
-              const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-              return uploadDate > weekAgo
-            }).length,
-          })
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to fetch stats')
         }
+
+        setStats({
+          totalPhotos: data.totalPhotos ?? 0,
+          categories: data.categories ?? CATEGORIES.length,
+          favorites: 0, // Would need to fetch from user data
+          recentUploads: data.recentUploads ?? 0,
+        })
       } catch (error) {
         console.error('Failed to fetch stats:', error)
       } finally {

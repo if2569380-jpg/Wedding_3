@@ -2,6 +2,22 @@ import { createClient } from '@/lib/supabaseServer'
 import { createAdminClient } from '@/lib/supabaseAdmin'
 import { NextRequest, NextResponse } from 'next/server'
 
+function extractStoragePath(value: string, bucketName: string) {
+  if (!value) return null
+  if (!/^https?:\/\//i.test(value)) return value.replace(/^\/+/, '')
+
+  try {
+    const url = new URL(value)
+    const marker = `/storage/v1/object/${url.pathname.includes('/sign/') ? 'sign' : 'public'}/${bucketName}/`
+    const markerIndex = url.pathname.indexOf(marker)
+    if (markerIndex === -1) return null
+    const start = markerIndex + marker.length
+    return decodeURIComponent(url.pathname.slice(start))
+  } catch {
+    return null
+  }
+}
+
 export async function PATCH(request: NextRequest) {
   try {
     const supabase = await createClient()
@@ -118,8 +134,8 @@ export async function DELETE(request: NextRequest) {
     const bucketName = process.env.SUPABASE_GALLERY_BUCKET || 'gallery'
     
     // Delete from storage (extract path from URL)
-    const thumbnailPath = image.src.split(`${bucketName}/`).pop()
-    const fullPath = image.full_src.split(`${bucketName}/`).pop()
+    const thumbnailPath = extractStoragePath(image.src, bucketName)
+    const fullPath = extractStoragePath(image.full_src, bucketName)
     
     if (thumbnailPath) {
       await supabase.storage.from(bucketName).remove([thumbnailPath])

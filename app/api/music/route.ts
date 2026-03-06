@@ -13,7 +13,7 @@ export async function GET() {
 
     const { data: songs, error } = await supabase
       .from('songs')
-      .select('*')
+      .select('title, src, source_type')
       .eq('is_active', true)
       .order('display_order', { ascending: true });
 
@@ -28,7 +28,14 @@ export async function GET() {
       source_type: song.source_type,
     })) || [];
 
-    return NextResponse.json({ files });
+    return NextResponse.json(
+      { files },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error in music API:', error);
     return NextResponse.json({ files: [] });

@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabaseAdmin';
 import { createClient as createServerClient } from '@/lib/supabaseServer';
 
-export const dynamic = 'force-dynamic';
-
 // PUT - Update song
 export async function PUT(
   request: Request,
@@ -44,7 +42,7 @@ export async function PUT(
       .from('songs')
       .update(updateData)
       .eq('id', id)
-      .select()
+      .select('id, title, artist, src, is_active, display_order, source_type, created_at')
       .single();
 
     if (error) {
