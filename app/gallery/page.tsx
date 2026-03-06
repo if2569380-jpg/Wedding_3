@@ -162,6 +162,7 @@ export default function GalleryPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'masonry' | 'grid'>(settings.default_view_mode);
@@ -253,7 +254,19 @@ export default function GalleryPage() {
     localStorage.setItem('gallery-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const filteredPhotos = photos.filter((photo) => {
+  // Generate search suggestions based on photo names and categories
+  const suggestions = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    const photoNames = photos
+      .filter(p => p.alt.toLowerCase().includes(query))
+      .map(p => p.alt)
+      .slice(0, 5);
+    const categories = CATEGORIES.filter(c => 
+      c !== 'All' && c.toLowerCase().includes(query)
+    );
+    return [...new Set([...categories, ...photoNames])].slice(0, 8);
+  }, [searchQuery, photos]);
     const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
     const matchesSearch = searchQuery === '' || 
       photo.alt.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -622,10 +635,11 @@ export default function GalleryPage() {
         </div>
       )}
 
-      {/* Category Filter */}
+      {/* Category Filter & Search */}
       {settings.show_category_filter && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-wrap justify-center gap-3">
+          {/* Categories, Search and Photo Count in one row */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {CATEGORIES.map((category) => (
               <button
                 key={category}
@@ -639,12 +653,49 @@ export default function GalleryPage() {
                 {category}
               </button>
             ))}
+            
+            {/* Search Input with Suggestions */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 z-10" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                className="w-40 pl-9 pr-4 py-2 rounded-full border border-stone-200 bg-white text-sm focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+              />
+              
+              {/* Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 py-2 z-50 min-w-[200px]">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSearchQuery(suggestion);
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    >
+                      <Search className="w-3 h-3 text-stone-400" />
+                      <span className="truncate">{suggestion}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {settings.show_photo_count && (
+              <span className="text-stone-500 font-sans text-sm">
+                • {displayedCount} of {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
+              </span>
+            )}
           </div>
-          {settings.show_photo_count && (
-            <p className="text-center text-stone-500 font-sans text-sm mt-4">
-              {displayedCount} of {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
-            </p>
-          )}
         </div>
       )}
 
