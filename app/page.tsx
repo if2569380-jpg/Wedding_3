@@ -10,45 +10,21 @@ import ShiftingCountdown from '@/components/ui/countdown-timer';
 function FloralDivider() {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-30">
-      {/* Curved bottom edge */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 bg-[#faf9f6]" 
-        style={{ 
-          borderTopLeftRadius: '50% 100%', 
-          borderTopRightRadius: '50% 100%',
-          transform: 'translateY(1px)'
-        }} 
-      />
-      {/* Floral decoration */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-40">
-        <svg width="120" height="60" viewBox="0 0 120 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <g opacity="0.6">
-            {/* Left branch */}
-            <path d="M60 50C50 45 35 35 25 25" stroke="#8b7355" strokeWidth="0.5" fill="none"/>
-            <circle cx="25" cy="25" r="3" fill="#c4a77d"/>
-            <circle cx="30" cy="30" r="2.5" fill="#d4b896"/>
-            <circle cx="20" cy="32" r="2" fill="#c4a77d"/>
-            <circle cx="35" cy="28" r="2" fill="#b8956a"/>
-            
-            {/* Right branch */}
-            <path d="M60 50C70 45 85 35 95 25" stroke="#8b7355" strokeWidth="0.5" fill="none"/>
-            <circle cx="95" cy="25" r="3" fill="#c4a77d"/>
-            <circle cx="90" cy="30" r="2.5" fill="#d4b896"/>
-            <circle cx="100" cy="32" r="2" fill="#c4a77d"/>
-            <circle cx="85" cy="28" r="2" fill="#b8956a"/>
-            
-            {/* Center flowers */}
-            <circle cx="60" cy="35" r="4" fill="#c9a86c"/>
-            <circle cx="55" cy="40" r="3" fill="#d4b896"/>
-            <circle cx="65" cy="40" r="3" fill="#b8956a"/>
-            <circle cx="50" cy="38" r="2.5" fill="#c4a77d"/>
-            <circle cx="70" cy="38" r="2.5" fill="#d4b896"/>
-            
-            {/* Small berries */}
-            <circle cx="45" cy="42" r="1.5" fill="#8b6914"/>
-            <circle cx="75" cy="42" r="1.5" fill="#8b6914"/>
-            <circle cx="60" cy="45" r="1.5" fill="#a67c52"/>
-          </g>
-        </svg>
+      {/* Simple straight bottom edge */}
+      <div className="h-0 bg-transparent" />
+      
+      {/* Minimal line divider with dots */}
+      <div className="absolute bottom-6 left-0 right-0 flex items-center justify-center gap-3">
+        <div className="w-24 h-px bg-white/40" />
+        <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
+        <div className="w-2 h-2 rounded-full bg-white/80" />
+        <div className="w-1.5 h-1.5 rounded-full bg-white/60" />
+        <div className="w-24 h-px bg-white/40" />
+      </div>
+      
+      {/* Scroll indicator */}
+      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1">
+        <ChevronDown className="w-5 h-5 text-white/50 animate-bounce" />
       </div>
     </div>
   );
@@ -103,10 +79,10 @@ function Navigation() {
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
-              <h1 className={`text-xl sm:text-2xl font-serif tracking-[0.15em] transition-colors ${
+              <h1 className={`text-2xl sm:text-3xl font-light italic tracking-normal transition-colors ${
                 scrolled ? 'text-stone-800' : 'text-white'
-              }`}>
-                Suborna ❤️ Hridoy
+              }`} style={{ fontFamily: "'Dancing Script', 'Great Vibes', 'Pacifico', cursive", textShadow: scrolled ? 'none' : '0 2px 10px rgba(0,0,0,0.3)' }}>
+                Suborna & Hridoy
               </h1>
             </Link>
 
@@ -603,47 +579,62 @@ export default function Home() {
             priority
             referrerPolicy="no-referrer"
           />
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/40 z-10" />
+          {/* Stronger Overlay for better contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-10" />
         </motion.div>
 
         <Navigation />
 
-        {/* Hero Content */}
-        <div className="relative z-20 text-center px-6 max-w-5xl mx-auto">
+        {/* Hero Content - Cleaner & Better Contrast */}
+        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.3 }}
+            className="text-xs sm:text-sm uppercase tracking-[0.3em] text-white/80 font-sans font-medium mb-6"
+            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
+          >
+            Suborna & Hridoy
+          </motion.p>
+
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-serif font-light text-white leading-tight tracking-wide"
-            style={{ textShadow: '0 2px 20px rgba(0,0,0,0.3)' }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-white leading-[1.1] tracking-tight"
+            style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}
           >
-            TURNING YOUR WEDDING DREAMS
-            <br />
-            <span className="italic">INTO ULTIMATE REALITY</span>
+            Turning Your Wedding Dreams
+            <span className="block italic font-light mt-2">Into Ultimate Reality</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.8 }}
-            className="mt-6 text-sm sm:text-base md:text-lg text-white/90 font-sans font-light tracking-wide max-w-2xl mx-auto"
-            style={{ textShadow: '0 1px 10px rgba(0,0,0,0.3)' }}
+            transition={{ duration: 0.8, delay: 0.8 }}
+            className="mt-8 text-base sm:text-lg text-white/90 font-sans font-light tracking-wide max-w-xl mx-auto leading-relaxed"
+            style={{ textShadow: '0 2px 15px rgba(0,0,0,0.5)' }}
           >
-            Crafting every detail to shape your perfect wedding day.
+            Crafting every detail to shape your perfect wedding day with love and elegance.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.1 }}
-            className="mt-10"
+            transition={{ duration: 0.8, delay: 1.1 }}
+            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
           >
             <Link
               href="#about"
-              className="inline-block px-10 py-4 bg-white/95 text-stone-800 text-xs tracking-[0.2em] font-sans font-medium hover:bg-white hover:scale-105 transition-all duration-300 shadow-lg"
+              className="px-10 py-4 bg-white text-stone-900 text-sm tracking-[0.15em] font-sans font-semibold rounded-full hover:bg-stone-100 hover:scale-105 transition-all duration-300 shadow-xl"
             >
-              GET STARTED
+              EXPLORE OUR STORY
+            </Link>
+            <Link
+              href="/gallery"
+              className="px-10 py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white text-sm tracking-[0.15em] font-sans font-medium rounded-full hover:bg-white/20 hover:scale-105 transition-all duration-300"
+            >
+              VIEW GALLERY
             </Link>
           </motion.div>
         </div>
@@ -728,36 +719,81 @@ export default function Home() {
       </div>
 
       {/* Final Section */}
-      <section id="contact" className="scroll-mt-24 h-screen flex flex-col items-center justify-center bg-[#1a1a1a] text-white p-8 text-center relative z-50">
+      <section id="contact" className="scroll-mt-24 min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a1a] via-[#252525] to-[#1a1a1a] text-white p-8 text-center relative z-50 overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-20 left-10 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
+        
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 1.5 }}
-          className="max-w-2xl"
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, ease: "easeOut" }}
+          viewport={{ once: true }}
+          className="max-w-3xl relative z-10"
         >
-          <h2 className="text-5xl md:text-7xl font-serif font-light mb-8">To be continued...</h2>
-          <p className="text-stone-400 font-serif italic text-xl mb-12">
+          {/* Decorative line above */}
+          <motion.div 
+            initial={{ scaleX: 0 }}
+            whileInView={{ scaleX: 1 }}
+            transition={{ duration: 1, delay: 0.3 }}
+            className="w-24 h-px bg-gradient-to-r from-transparent via-rose-400/60 to-transparent mx-auto mb-12"
+          />
+          
+          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-light mb-6 tracking-tight">
+            To be continued
+            <span className="text-rose-400">...</span>
+          </h2>
+          
+          <p className="text-stone-400 font-serif italic text-lg sm:text-xl mb-4">
             &quot;And so the adventure begins.&quot;
           </p>
-          <div className="flex gap-4 justify-center">
-            <button 
+          
+          {/* Names */}
+          <p className="text-2xl sm:text-3xl font-light italic mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
+            Suborna & Hridoy
+          </p>
+          
+          {/* Decorative divider */}
+          <div className="flex items-center justify-center gap-4 mb-12">
+            <div className="w-16 h-px bg-stone-700" />
+            <Heart className="w-5 h-5 text-rose-400/60" />
+            <div className="w-16 h-px bg-stone-700" />
+          </div>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <motion.button 
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="px-10 py-4 border border-white/20 rounded-full font-sans text-sm uppercase tracking-widest hover:bg-white hover:text-black transition-all duration-500"
+              className="px-8 py-4 border border-stone-600 rounded-full font-sans text-sm uppercase tracking-[0.2em] hover:bg-white hover:text-stone-900 hover:border-white transition-all duration-500"
             >
               Replay Story
-            </button>
-            <Link
-              href="/gallery"
-              className="px-10 py-4 bg-rose-500/80 rounded-full font-sans text-sm uppercase tracking-widest hover:bg-rose-500 transition-all duration-500 flex items-center gap-2"
-            >
-              <Images className="w-4 h-4" />
-              View Gallery
-            </Link>
+            </motion.button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+              <Link
+                href="/gallery"
+                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-rose-500 to-rose-600 rounded-full font-sans text-sm uppercase tracking-[0.2em] hover:from-rose-400 hover:to-rose-500 transition-all duration-500 shadow-lg shadow-rose-500/25"
+              >
+                <Images className="w-5 h-5" />
+                View Gallery
+              </Link>
+            </motion.div>
           </div>
         </motion.div>
         
-        <div className="absolute bottom-12 left-0 right-0 flex justify-center opacity-20">
-          <Heart className="w-8 h-8" />
+        {/* Bottom decorative heart */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.5 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.8, delay: 0.5 }}
+          className="absolute bottom-12 left-0 right-0 flex justify-center"
+        >
+          <Heart className="w-6 h-6 text-rose-400/30" fill="currentColor" />
+        </motion.div>
+        
+        {/* Copyright */}
+        <div className="absolute bottom-4 left-0 right-0 text-center">
+          <p className="text-xs text-stone-600 font-sans tracking-wider">Made with love • 2025</p>
         </div>
       </section>
     </main>
