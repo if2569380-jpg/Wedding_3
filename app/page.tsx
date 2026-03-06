@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { Heart, Calendar, MapPin, Camera, Music, Timer, ChevronDown, Images, Volume2, VolumeX, Play, Pause, Menu, X } from 'lucide-react';
 import Image from 'next/image';
 import { useState, useEffect, useSyncExternalStore, useRef, useCallback } from 'react';
@@ -30,25 +30,52 @@ function FloralDivider() {
   );
 }
 
-// Navigation Component
+// Navigation Component with Glassmorphism & Scroll Spy
 function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>('');
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
+      
+      // Scroll spy - determine active section
+      const sections = ['about', 'services', 'portfolio', 'contact'];
+      const scrollPosition = window.scrollY + window.innerHeight / 3;
+      
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const { offsetTop, offsetHeight } = element;
+          if (scrollPosition >= offsetTop && scrollPosition < offsetTop + offsetHeight) {
+            setActiveSection(section);
+            break;
+          }
+        }
+      }
     };
+    
     window.addEventListener('scroll', handleScroll);
+    handleScroll(); // Initial check
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const navItems = [
-    { label: 'ABOUT', href: '#about' },
-    { label: 'SERVICES', href: '#services' },
-    { label: 'PORTFOLIO', href: '#portfolio' },
-    { label: 'CONTACT', href: '#contact' },
+    { label: 'ABOUT', href: '#about', id: 'about' },
+    { label: 'SERVICES', href: '#services', id: 'services' },
+    { label: 'PORTFOLIO', href: '#portfolio', id: 'portfolio' },
+    { label: 'CONTACT', href: '#contact', id: 'contact' },
   ];
+
+  const scrollToSection = (href: string) => {
+    const id = href.replace('#', '');
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setIsOpen(false);
+  };
 
   return (
     <>
@@ -57,7 +84,9 @@ function Navigation() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-          scrolled ? 'bg-white/90 backdrop-blur-md shadow-sm' : 'bg-transparent'
+          scrolled 
+            ? 'bg-white/85 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-stone-200/50' 
+            : 'bg-transparent'
         }`}
       >
         <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
@@ -65,39 +94,60 @@ function Navigation() {
             {/* Left nav items */}
             <div className="hidden md:flex items-center gap-8">
               {navItems.slice(0, 2).map((item) => (
-                <Link
+                <button
                   key={item.label}
-                  href={item.href}
-                  className={`text-xs tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
+                  onClick={() => scrollToSection(item.href)}
+                  className={`relative text-xs tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
                     scrolled ? 'text-stone-600' : 'text-white/90'
-                  }`}
+                  } ${activeSection === item.id ? 'text-rose-500' : ''}`}
                 >
                   {item.label}
-                </Link>
+                  {activeSection === item.id && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className={`absolute -bottom-1 left-0 right-0 h-0.5 ${scrolled ? 'bg-rose-500' : 'bg-white/70'}`}
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
               ))}
             </div>
 
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
-              <h1 className={`text-2xl sm:text-3xl font-light italic tracking-normal transition-colors ${
-                scrolled ? 'text-stone-800' : 'text-white'
-              }`} style={{ fontFamily: "'Dancing Script', 'Great Vibes', 'Pacifico', cursive", textShadow: scrolled ? 'none' : '0 2px 10px rgba(0,0,0,0.3)' }}>
-                Suborna & Hridoy
-              </h1>
+              <motion.h1 
+                className={`text-2xl sm:text-3xl font-light italic tracking-normal transition-colors ${
+                  scrolled ? 'text-stone-800' : 'text-white'
+                }`} 
+                style={{ 
+                  fontFamily: "'Dancing Script', 'Great Vibes', 'Pacifico', cursive", 
+                  textShadow: scrolled ? 'none' : '0 2px 10px rgba(0,0,0,0.3)' 
+                }}
+                whileHover={{ scale: 1.02 }}
+              >
+                Suborna <span className="text-rose-400 mx-1">&</span> Hridoy
+              </motion.h1>
             </Link>
 
             {/* Right nav items */}
             <div className="hidden md:flex items-center gap-8">
               {navItems.slice(2).map((item) => (
-                <Link
+                <button
                   key={item.label}
-                  href={item.href}
-                  className={`text-xs tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
+                  onClick={() => scrollToSection(item.href)}
+                  className={`relative text-xs tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
                     scrolled ? 'text-stone-600' : 'text-white/90'
-                  }`}
+                  } ${activeSection === item.id ? 'text-rose-500' : ''}`}
                 >
                   {item.label}
-                </Link>
+                  {activeSection === item.id && (
+                    <motion.div
+                      layoutId="activeNav"
+                      className={`absolute -bottom-1 left-0 right-0 h-0.5 ${scrolled ? 'bg-rose-500' : 'bg-white/70'}`}
+                      transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                    />
+                  )}
+                </button>
               ))}
             </div>
 
@@ -122,18 +172,19 @@ function Navigation() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-white pt-24 px-6 md:hidden"
+            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl pt-24 px-6 md:hidden"
           >
             <div className="flex flex-col items-center gap-8">
               {navItems.map((item) => (
-                <Link
+                <button
                   key={item.label}
-                  href={item.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-sm tracking-[0.2em] font-sans font-medium text-stone-600 hover:text-rose-500 transition-colors"
+                  onClick={() => scrollToSection(item.href)}
+                  className={`text-sm tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
+                    activeSection === item.id ? 'text-rose-500' : 'text-stone-600'
+                  }`}
                 >
                   {item.label}
-                </Link>
+                </button>
               ))}
             </div>
           </motion.div>
@@ -560,33 +611,46 @@ function Sparkles({ className }: { className?: string }) {
 }
 
 export default function Home() {
+  const { scrollY } = useScroll();
+  const y1 = useTransform(scrollY, [0, 500], [0, 150]);
+  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+  const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
+
   return (
     <main className="relative antialiased selection:bg-rose-100 selection:text-rose-900">
-      {/* Hero Section */}
+      {/* Hero Section with Parallax */}
       <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-        {/* Background Image */}
+        {/* Background Image with Parallax */}
         <motion.div
           initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1.5, ease: [0.25, 0.46, 0.45, 0.94] }}
           className="absolute inset-0 z-0"
         >
-          <Image 
-            src="https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/hero-image-1772817907417.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvaGVyby1pbWFnZS0xNzcyODE3OTA3NDE3LmpmaWYiLCJpYXQiOjE3NzI4MTc5MjAsImV4cCI6MTc3MjgyMTUyMH0.QD33c9HjVHFSkuCmKbn6kWksl0AxxruJoLQRjroLk_4" 
-            alt="Wedding couple" 
-            fill 
-            className="object-cover"
-            priority
-            referrerPolicy="no-referrer"
-          />
+          <motion.div 
+            style={{ y: y1, scale }}
+            className="absolute inset-0"
+          >
+            <Image 
+              src="https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/hero-image-1772817907417.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvaGVyby1pbWFnZS0xNzcyODE3OTA3NDE3LmpmaWYiLCJpYXQiOjE3NzI4MTc5MjAsImV4cCI6MTc3MjgyMTUyMH0.QD33c9HjVHFSkuCmKbn6kWksl0AxxruJoLQRjroLk_4" 
+              alt="Wedding couple" 
+              fill 
+              className="object-cover"
+              priority
+              referrerPolicy="no-referrer"
+            />
+          </motion.div>
           {/* Stronger Overlay for better contrast */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-10" />
         </motion.div>
 
         <Navigation />
 
-        {/* Hero Content - Cleaner & Better Contrast */}
-        <div className="relative z-20 text-center px-6 max-w-4xl mx-auto">
+        {/* Hero Content with Parallax Fade */}
+        <motion.div 
+          style={{ opacity }}
+          className="relative z-20 text-center px-6 max-w-4xl mx-auto"
+        >
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -637,7 +701,7 @@ export default function Home() {
               VIEW GALLERY
             </Link>
           </motion.div>
-        </div>
+        </motion.div>
 
         <FloralDivider />
       </section>
