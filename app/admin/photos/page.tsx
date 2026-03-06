@@ -26,27 +26,59 @@ interface GalleryImage {
 }
 
 const DEFAULT_CATEGORIES = ['All', 'Ceremony', 'Reception', 'Portraits', 'Details']
+const CUSTOM_CATEGORIES_SETTINGS_KEY = 'custom_categories'
+
+function normalizeCategory(value: string) {
+  return value.trim()
+}
+
+function uniqCategories(values: string[]) {
+  const seen = new Set<string>()
+  const unique: string[] = []
+
+  for (const rawValue of values) {
+    const value = normalizeCategory(rawValue)
+    if (!value) continue
+
+    const lower = value.toLowerCase()
+    if (seen.has(lower)) continue
+
+    seen.add(lower)
+    unique.push(value)
+  }
+
+  return unique
+}
 
 export default function PhotosPage() {
   const [photos, setPhotos] = useState<GalleryImage[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [actionMessage, setActionMessage] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [selectedPhotos, setSelectedPhotos] = useState<Set<string>>(new Set())
   const [deleting, setDeleting] = useState(false)
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState(false)
+  const [bulkUpdatingCategory, setBulkUpdatingCategory] = useState(false)
+  const [bulkCategory, setBulkCategory] = useState('Ceremony')
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null)
   const [editingPhoto, setEditingPhoto] = useState<GalleryImage | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [editCategory, setEditCategory] = useState('')
   const [customCategories, setCustomCategories] = useState<string[]>([])
+  const [loadingCategories, setLoadingCategories] = useState(true)
+  const [persistingCategories, setPersistingCategories] = useState(false)
   const [newCategory, setNewCategory] = useState('')
   const [showAddCategory, setShowAddCategory] = useState(false)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     fetchPhotos()
+    fetchCustomCategories()
   }, [])
 
   async function fetchPhotos() {
@@ -67,8 +99,59 @@ export default function PhotosPage() {
     }
   }
 
+  async function fetchCustomCategories() {
+    try {
+      setLoadingCategories(true)
+
+      const response = await fetch('/api/gallery/settings')
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to load categories')
+      }
+
+      const persisted = Array.isArray(data.settings?.[CUSTOM_CATEGORIES_SETTINGS_KEY])
+        ? data.settings[CUSTOM_CATEGORIES_SETTINGS_KEY]
+        : []
+
+      const validCustomCategories = uniqCategories(
+        persisted.filter((category: unknown) => typeof category === 'string')
+      ).filter(
+        (category) => !DEFAULT_CATEGORIES.some((defaultCategory) => defaultCategory.toLowerCase() === category.toLowerCase())
+      )
+
+      setCustomCategories(validCustomCategories)
+      if (validCustomCategories.length > 0) {
+        setBulkCategory(validCustomCategories[0])
+      }
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to load custom categories')
+    } finally {
+      setLoadingCategories(false)
+    }
+  }
+
+  async function persistCustomCategories(nextCategories: string[]) {
+    const response = await fetch('/api/gallery/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        [CUSTOM_CATEGORIES_SETTINGS_KEY]: nextCategories,
+      }),
+    })
+
+    if (!response.ok) {
+      const data = await response.json().catch(() => null)
+      throw new Error(data?.error || 'Failed to save custom categories')
+    }
+  }
+
   // Combine default and custom categories
-  const allCategories = [...DEFAULT_CATEGORIES, ...customCategories.filter(c => !DEFAULT_CATEGORIES.includes(c))]
+  const categoriesFromPhotos = uniqCategories(photos.map((photo) => photo.category)).filter(
+    (category) => !DEFAULT_CATEGORIES.some((defaultCategory) => defaultCategory.toLowerCase() === category.toLowerCase())
+  )
+  const allCategories = uniqCategories([...DEFAULT_CATEGORIES, ...customCategories, ...categoriesFromPhotos])
+  const selectableCategories = allCategories.filter((category) => category !== 'All')
 
   const filteredPhotos = photos.filter((photo) => {
     const matchesSearch = photo.alt
@@ -79,10 +162,25 @@ export default function PhotosPage() {
     return matchesSearch && matchesCategory
   })
 
+  useEffect(() => {
+    if (!allCategories.includes(selectedCategory)) {
+      setSelectedCategory('All')
+    }
+  }, [allCategories, selectedCategory])
+
+  useEffect(() => {
+    if (selectableCategories.length === 0) return
+    if (!selectableCategories.includes(bulkCategory)) {
+      setBulkCategory(selectableCategories[0])
+    }
+  }, [bulkCategory, selectableCategories])
+
   async function handleUpdatePhoto() {
     if (!editingPhoto) return
     
     setSaving(true)
+    setActionError(null)
+    setActionMessage(null)
     try {
       const response = await fetch('/api/admin/photos', {
         method: 'PATCH',
@@ -111,8 +209,9 @@ export default function PhotosPage() {
       setEditingPhoto(null)
       setEditTitle('')
       setEditCategory('')
+      setActionMessage('Photo updated successfully')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to update photo')
+      setActionError(err instanceof Error ? err.message : 'Failed to update photo')
     } finally {
       setSaving(false)
     }
@@ -124,16 +223,42 @@ export default function PhotosPage() {
     setEditCategory(photo.category)
   }
 
-  function handleAddCategory() {
-    if (newCategory.trim() && !allCategories.includes(newCategory.trim())) {
-      setCustomCategories([...customCategories, newCategory.trim()])
+  async function handleAddCategory() {
+    const value = normalizeCategory(newCategory)
+    if (!value) return
+
+    const isDuplicate = allCategories.some((category) => category.toLowerCase() === value.toLowerCase())
+    if (isDuplicate) {
+      setActionError('Category already exists')
+      return
+    }
+
+    const previous = customCategories
+    const nextCustomCategories = uniqCategories([...customCategories, value])
+
+    setPersistingCategories(true)
+    setActionError(null)
+    setActionMessage(null)
+    setCustomCategories(nextCustomCategories)
+
+    try {
+      await persistCustomCategories(nextCustomCategories)
+      setBulkCategory(value)
       setNewCategory('')
       setShowAddCategory(false)
+      setActionMessage(`Category "${value}" added`)
+    } catch (err) {
+      setCustomCategories(previous)
+      setActionError(err instanceof Error ? err.message : 'Failed to save category')
+    } finally {
+      setPersistingCategories(false)
     }
   }
 
   async function handleDelete(id: string) {
     setDeleting(true)
+    setActionError(null)
+    setActionMessage(null)
     try {
       const response = await fetch(`/api/admin/photos?id=${id}`, {
         method: 'DELETE',
@@ -145,11 +270,125 @@ export default function PhotosPage() {
       }
 
       setPhotos((prev) => prev.filter((p) => p.id !== id))
+      setSelectedPhotos((prev) => {
+        const next = new Set(prev)
+        next.delete(id)
+        return next
+      })
       setDeleteConfirm(null)
+      setActionMessage('Photo deleted successfully')
     } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to delete photo')
+      setActionError(err instanceof Error ? err.message : 'Failed to delete photo')
     } finally {
       setDeleting(false)
+    }
+  }
+
+  async function handleBulkCategoryUpdate() {
+    if (selectedPhotos.size === 0 || !bulkCategory) return
+
+    const ids = [...selectedPhotos]
+    setBulkUpdatingCategory(true)
+    setActionError(null)
+    setActionMessage(null)
+
+    try {
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const response = await fetch('/api/admin/photos', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id,
+              category: bulkCategory,
+            }),
+          })
+
+          if (!response.ok) {
+            const data = await response.json().catch(() => null)
+            return {
+              id,
+              success: false,
+              error: data?.error || 'Failed to update photo category',
+            }
+          }
+
+          return { id, success: true, error: null }
+        })
+      )
+
+      const successIds = new Set(results.filter((result) => result.success).map((result) => result.id))
+      const failed = results.filter((result) => !result.success)
+
+      if (successIds.size > 0) {
+        setPhotos((prev) =>
+          prev.map((photo) =>
+            successIds.has(photo.id)
+              ? { ...photo, category: bulkCategory }
+              : photo
+          )
+        )
+      }
+
+      if (failed.length > 0) {
+        setActionError(`Updated ${successIds.size} photo(s), failed ${failed.length}`)
+      } else {
+        setActionMessage(`Category updated for ${successIds.size} photo(s)`)
+      }
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to update categories')
+    } finally {
+      setBulkUpdatingCategory(false)
+    }
+  }
+
+  async function handleBulkDelete() {
+    if (selectedPhotos.size === 0) return
+
+    const ids = [...selectedPhotos]
+    setBulkDeleting(true)
+    setActionError(null)
+    setActionMessage(null)
+
+    try {
+      const results = await Promise.all(
+        ids.map(async (id) => {
+          const response = await fetch(`/api/admin/photos?id=${id}`, {
+            method: 'DELETE',
+          })
+
+          if (!response.ok) {
+            const data = await response.json().catch(() => null)
+            return {
+              id,
+              success: false,
+              error: data?.error || 'Failed to delete photo',
+            }
+          }
+
+          return { id, success: true, error: null }
+        })
+      )
+
+      const successIds = new Set(results.filter((result) => result.success).map((result) => result.id))
+      const failedIds = new Set(results.filter((result) => !result.success).map((result) => result.id))
+
+      if (successIds.size > 0) {
+        setPhotos((prev) => prev.filter((photo) => !successIds.has(photo.id)))
+      }
+
+      setSelectedPhotos(new Set([...failedIds]))
+      setBulkDeleteConfirm(false)
+
+      if (failedIds.size > 0) {
+        setActionError(`Deleted ${successIds.size} photo(s), failed ${failedIds.size}`)
+      } else {
+        setActionMessage(`Deleted ${successIds.size} photo(s)`)
+      }
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Failed to delete selected photos')
+    } finally {
+      setBulkDeleting(false)
     }
   }
 
@@ -221,6 +460,18 @@ export default function PhotosPage() {
         )}
       </div>
 
+      {actionError && (
+        <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-sans text-sm">
+          {actionError}
+        </div>
+      )}
+
+      {actionMessage && (
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-sans text-sm">
+          {actionMessage}
+        </div>
+      )}
+
       {/* Filters */}
       <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 space-y-4">
         <div className="flex flex-col sm:flex-row gap-4">
@@ -254,6 +505,7 @@ export default function PhotosPage() {
               onClick={() => setShowAddCategory(true)}
               className="p-2 rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors"
               title="Add new category"
+              disabled={loadingCategories || persistingCategories}
             >
               <Plus className="w-4 h-4" />
             </button>
@@ -302,6 +554,36 @@ export default function PhotosPage() {
               </>
             )}
           </button>
+
+          {selectedPhotos.size > 0 && (
+            <div className="ml-auto flex flex-wrap items-center gap-2">
+              <select
+                value={bulkCategory}
+                onChange={(e) => setBulkCategory(e.target.value)}
+                className="px-3 py-2 rounded-lg border border-stone-200 text-sm font-sans bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none"
+              >
+                {selectableCategories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+              <button
+                onClick={handleBulkCategoryUpdate}
+                disabled={bulkUpdatingCategory || selectableCategories.length === 0}
+                className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-sans hover:bg-blue-700 transition-colors disabled:opacity-50"
+              >
+                {bulkUpdatingCategory ? 'Updating...' : 'Apply Category'}
+              </button>
+              <button
+                onClick={() => setBulkDeleteConfirm(true)}
+                disabled={bulkDeleting}
+                className="px-3 py-2 rounded-lg bg-rose-600 text-white text-sm font-sans hover:bg-rose-700 transition-colors disabled:opacity-50"
+              >
+                {bulkDeleting ? 'Deleting...' : `Delete Selected (${selectedPhotos.size})`}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
@@ -555,6 +837,51 @@ export default function PhotosPage() {
         </div>
       )}
 
+      {/* Bulk Delete Confirmation Modal */}
+      {bulkDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
+          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
+                <AlertCircle className="w-6 h-6 text-rose-600" />
+              </div>
+              <h3 className="text-lg font-serif text-stone-800">
+                Delete {selectedPhotos.size} Photos?
+              </h3>
+            </div>
+            <p className="text-stone-600 font-sans mb-6">
+              This action cannot be undone. Selected photos will be removed from gallery and storage.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setBulkDeleteConfirm(false)}
+                className="px-4 py-2 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
+                disabled={bulkDeleting}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+                className="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center gap-2"
+              >
+                {bulkDeleting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Deleting...
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="w-4 h-4" />
+                    Delete All Selected
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Edit Photo Modal */}
       {editingPhoto && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
@@ -659,6 +986,7 @@ export default function PhotosPage() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAddCategory()
               }}
+              disabled={persistingCategories}
             />
             <div className="flex gap-3 justify-end">
               <button
@@ -667,16 +995,23 @@ export default function PhotosPage() {
                   setNewCategory('')
                 }}
                 className="px-4 py-2 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
+                disabled={persistingCategories}
               >
                 Cancel
               </button>
               <button
                 onClick={handleAddCategory}
-                disabled={!newCategory.trim() || allCategories.includes(newCategory.trim())}
+                disabled={
+                  persistingCategories ||
+                  !normalizeCategory(newCategory) ||
+                  allCategories.some(
+                    (category) => category.toLowerCase() === normalizeCategory(newCategory).toLowerCase()
+                  )
+                }
                 className="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center gap-2"
               >
                 <Plus className="w-4 h-4" />
-                Add
+                {persistingCategories ? 'Saving...' : 'Add'}
               </button>
             </div>
           </div>
