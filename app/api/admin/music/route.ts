@@ -1,17 +1,25 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabaseAdmin';
+import { createClient as createServerClient } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
 // GET all songs (including inactive - for admin)
 export async function GET() {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-    const { data: songs, error } = await supabase
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const adminClient = createAdminClient();
+
+    const { data: songs, error } = await adminClient
       .from('songs')
       .select('*')
       .order('display_order', { ascending: true });
@@ -31,6 +39,16 @@ export async function GET() {
 // POST new song
 export async function POST(request: Request) {
   try {
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const { title, artist, src, is_active, display_order, source_type } = body;
 
@@ -41,16 +59,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const adminClient = createAdminClient();
 
     // Auto-detect if it's a YouTube URL
     const isYouTubeUrl = /(?:youtube\.com|youtu\.be)/.test(src);
     const finalSourceType = source_type || (isYouTubeUrl ? 'youtube' : 'local');
 
-    const { data: song, error } = await supabase
+    const { data: song, error } = await adminClient
       .from('songs')
       .insert({
         title,

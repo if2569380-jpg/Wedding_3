@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/lib/supabaseAdmin';
+import { createClient as createServerClient } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,14 +10,21 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
     const body = await request.json();
     const { title, artist, src, is_active, display_order, source_type } = body;
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const adminClient = createAdminClient();
 
     const updateData: Record<string, unknown> = {};
     if (title !== undefined) updateData.title = title;
@@ -32,7 +40,7 @@ export async function PUT(
       updateData.source_type = isYouTubeUrl ? 'youtube' : 'local';
     }
 
-    const { data: song, error } = await supabase
+    const { data: song, error } = await adminClient
       .from('songs')
       .update(updateData)
       .eq('id', id)
@@ -57,14 +65,21 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const supabase = await createServerClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const { id } = await params;
 
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    );
+    const adminClient = createAdminClient();
 
-    const { error } = await supabase
+    const { error } = await adminClient
       .from('songs')
       .delete()
       .eq('id', id);
