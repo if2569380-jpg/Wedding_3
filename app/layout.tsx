@@ -3,6 +3,7 @@ import { Inter, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { BackgroundMusic } from '@/components/BackgroundMusic';
 import { GallerySettingsProvider } from './providers';
+import { Analytics } from '@vercel/analytics/next';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -28,6 +29,7 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           {children}
         </GallerySettingsProvider>
         <BackgroundMusic />
+        <Analytics />
       </body>
     </html>
   );
