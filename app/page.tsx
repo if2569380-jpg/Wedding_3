@@ -857,7 +857,7 @@ export default function Home() {
         
         {/* Copyright */}
         <div className="absolute bottom-4 left-0 right-0 text-center">
-          <p className="text-xs text-stone-600 font-sans tracking-wider">Made with love • 2025 • Developer: Abu Saeed</p>
+          <p className="text-xs text-stone-600 font-sans tracking-wider">Made with love • 2025</p>
         </div>
       </section>
     </main>
