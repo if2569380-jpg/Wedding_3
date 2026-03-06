@@ -58,6 +58,7 @@ export default function GalleryPage() {
   const [linkCopied, setLinkCopied] = useState(false);
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(20);
   const slideshowRef = useRef<NodeJS.Timeout | null>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -101,6 +102,28 @@ export default function GalleryPage() {
   const filteredPhotos = selectedCategory === 'All'
     ? photos
     : photos.filter((photo) => photo.category === selectedCategory);
+  const parsedItemsPerPage = Number(settings.items_per_page);
+  const itemsPerPage = Number.isFinite(parsedItemsPerPage) && parsedItemsPerPage > 0
+    ? Math.floor(parsedItemsPerPage)
+    : 20;
+  const visiblePhotos = filteredPhotos.slice(0, visibleCount);
+  const canLoadMore = visibleCount < filteredPhotos.length;
+  const displayedCount = Math.min(visibleCount, filteredPhotos.length);
+  const watermarkText = String(settings.watermark_text || settings.gallery_title).trim();
+  const showWatermark = settings.watermark_enabled && watermarkText.length > 0;
+
+  useEffect(() => {
+    setVisibleCount(itemsPerPage);
+  }, [itemsPerPage, selectedCategory, photos.length]);
+
+  useEffect(() => {
+    if (selectedPhoto === null) return;
+    if (selectedPhoto >= filteredPhotos.length) {
+      setSelectedPhoto(null);
+      setIsSlideshow(false);
+      document.body.style.overflow = 'unset';
+    }
+  }, [filteredPhotos.length, selectedPhoto]);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -371,7 +394,7 @@ export default function GalleryPage() {
           </div>
           {settings.show_photo_count && (
             <p className="text-center text-stone-500 font-sans text-sm mt-4">
-              {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
+              {displayedCount} of {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
             </p>
           )}
         </div>
@@ -398,69 +421,90 @@ export default function GalleryPage() {
             <p className="text-stone-600 font-sans">No photos available yet.</p>
           </div>
         ) : (
-        <motion.div
-          layout
-          className={
-            viewMode === 'masonry'
-              ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4'
-              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-          }
-        >
-          <AnimatePresence mode="popLayout">
-            {filteredPhotos.map((photo, index) => (
-              <motion.div
-                key={photo.id}
-                layout
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
-                onClick={() => openLightbox(index)}
-                className={`group relative cursor-pointer overflow-hidden rounded-xl ${
-                  viewMode === 'masonry' ? 'break-inside-avoid' : 'aspect-square'
-                }`}
-              >
-                <Image
-                  src={photo.src}
-                  alt={photo.alt}
-                  width={800}
-                  height={600}
-                  className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                    viewMode === 'grid' ? 'h-full' : 'h-auto'
-                  }`}
-                  referrerPolicy="no-referrer"
-                  unoptimized
-                />
-                
-                {/* Hover Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="absolute bottom-0 left-0 right-0 p-4">
-                    <p className="text-white font-serif text-lg">{photo.alt}</p>
-                    <p className="text-white/70 text-xs uppercase tracking-widest font-sans mt-1">
-                      {photo.category}
-                    </p>
-                  </div>
-                  
-                  {/* Favorite Button */}
-                  {settings.allow_favorites && (
-                    <button
-                      onClick={(e) => toggleFavorite(photo.id, e)}
-                      className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
-                    >
-                      <Heart
-                        className={`w-5 h-5 transition-colors ${
-                          favorites.includes(photo.id)
-                            ? 'text-rose-400 fill-rose-400'
-                            : 'text-white'
-                        }`}
-                      />
-                    </button>
-                  )}
-                </div>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </motion.div>
+          <>
+            <motion.div
+              layout
+              className={
+                viewMode === 'masonry'
+                  ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4'
+                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+              }
+            >
+              <AnimatePresence mode="popLayout">
+                {visiblePhotos.map((photo, index) => (
+                  <motion.div
+                    key={photo.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    onClick={() => openLightbox(index)}
+                    className={`group relative cursor-pointer overflow-hidden rounded-xl ${
+                      viewMode === 'masonry' ? 'break-inside-avoid' : 'aspect-square'
+                    }`}
+                  >
+                    <Image
+                      src={photo.src}
+                      alt={photo.alt}
+                      width={800}
+                      height={600}
+                      className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+                        viewMode === 'grid' ? 'h-full' : 'h-auto'
+                      }`}
+                      referrerPolicy="no-referrer"
+                      unoptimized
+                    />
+
+                    {showWatermark && (
+                      <div className="absolute inset-0 pointer-events-none flex items-end justify-end p-3">
+                        <span className="rounded-md bg-black/40 px-2 py-1 text-[10px] uppercase tracking-wider text-white/85 font-sans">
+                          {watermarkText}
+                        </span>
+                      </div>
+                    )}
+                    
+                    {/* Hover Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="absolute bottom-0 left-0 right-0 p-4">
+                        <p className="text-white font-serif text-lg">{photo.alt}</p>
+                        <p className="text-white/70 text-xs uppercase tracking-widest font-sans mt-1">
+                          {photo.category}
+                        </p>
+                      </div>
+                      
+                      {/* Favorite Button */}
+                      {settings.allow_favorites && (
+                        <button
+                          onClick={(e) => toggleFavorite(photo.id, e)}
+                          className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
+                        >
+                          <Heart
+                            className={`w-5 h-5 transition-colors ${
+                              favorites.includes(photo.id)
+                                ? 'text-rose-400 fill-rose-400'
+                                : 'text-white'
+                            }`}
+                          />
+                        </button>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+            {canLoadMore && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisibleCount((prev) => prev + itemsPerPage)}
+                  className="px-6 py-3 rounded-xl bg-stone-800 text-white font-sans text-sm uppercase tracking-wider hover:bg-stone-700 transition-colors"
+                >
+                  Load more photos
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
@@ -636,7 +680,7 @@ export default function GalleryPage() {
               ref={imageContainerRef}
             >
               <div
-                className="cursor-move"
+                className="relative cursor-move"
                 style={{
                   transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
                   transition: isDragging ? 'none' : 'transform 0.3s ease-out',
@@ -657,6 +701,13 @@ export default function GalleryPage() {
                   draggable={false}
                   unoptimized
                 />
+                {showWatermark && (
+                  <div className="absolute inset-0 pointer-events-none flex items-end justify-end p-4 md:p-6">
+                    <span className="rounded-lg bg-black/45 px-3 py-1.5 text-xs uppercase tracking-[0.15em] text-white/90 font-sans">
+                      {watermarkText}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Favorite in Lightbox */}
