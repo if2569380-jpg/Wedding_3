@@ -61,7 +61,6 @@ export default function GalleryPage() {
   const slideshowRef = useRef<NodeJS.Timeout | null>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   // Fetch photos from Supabase
   useEffect(() => {
@@ -105,6 +104,7 @@ export default function GalleryPage() {
 
   const handleLogout = async () => {
     setLoggingOut(true);
+    const supabase = createClient();
     await supabase.auth.signOut();
     router.push('/login');
     router.refresh();
