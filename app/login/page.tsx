@@ -29,7 +29,7 @@ export default function LoginPage() {
               className="text-2xl text-stone-800"
               style={{ fontFamily: "'Dancing Script', cursive" }}
             >
-              Suborna & Hridoy
+              Laboni & Adnan Arif
             </span>
           </Link>
         </motion.div>

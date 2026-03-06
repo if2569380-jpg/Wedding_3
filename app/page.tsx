@@ -658,7 +658,7 @@ export default function Home() {
             className="text-xs sm:text-sm uppercase tracking-[0.3em] text-white/80 font-sans font-medium mb-6"
             style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
           >
-            Suborna & Hridoy
+            Laboni & Adnan Arif
           </motion.p>
 
           <motion.h1
@@ -814,7 +814,7 @@ export default function Home() {
           
           {/* Names */}
           <p className="text-2xl sm:text-3xl font-light italic mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
-            Suborna & Hridoy
+            Laboni & Adnan Arif
           </p>
           
           {/* Decorative divider */}
