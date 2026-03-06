@@ -20,7 +20,8 @@ import {
   Share2,
   Copy,
   Check,
-  LogOut
+  LogOut,
+  Search
 } from 'lucide-react';
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Image from 'next/image';
@@ -28,6 +29,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 import { useGallerySettings } from '@/app/providers';
+import WelcomeBanner from '@/components/WelcomeBanner';
 
 interface GalleryImage {
   id: string;
@@ -159,6 +161,7 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'masonry' | 'grid'>(settings.default_view_mode);
@@ -180,6 +183,39 @@ export default function GalleryPage() {
   const touchStartY = useRef<number | null>(null);
   const lastTapTime = useRef<number>(0);
   const router = useRouter();
+
+  // Family member welcome state
+  const [familyMember, setFamilyMember] = useState<{
+    id: string;
+    name: string;
+    relationship: string | null;
+    welcome_message: string | null;
+    avatar_url: string | null;
+  } | null>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  // Fetch current user and family member data
+  useEffect(() => {
+    async function fetchFamilyMember() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user?.email) {
+          const response = await fetch(`/api/family-members?email=${encodeURIComponent(user.email)}`);
+          const data = await response.json();
+          
+          if (data.members && data.members.length > 0) {
+            setFamilyMember(data.members[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching family member:', error);
+      }
+    }
+
+    fetchFamilyMember();
+  }, []);
 
   // Fetch photos from Supabase
   useEffect(() => {
@@ -217,9 +253,13 @@ export default function GalleryPage() {
     localStorage.setItem('gallery-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const filteredPhotos = selectedCategory === 'All'
-    ? photos
-    : photos.filter((photo) => photo.category === selectedCategory);
+  const filteredPhotos = photos.filter((photo) => {
+    const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
+    const matchesSearch = searchQuery === '' || 
+      photo.alt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      photo.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
   const parsedItemsPerPage = Number(settings.items_per_page);
   const itemsPerPage = Number.isFinite(parsedItemsPerPage) && parsedItemsPerPage > 0
     ? Math.floor(parsedItemsPerPage)
@@ -571,6 +611,16 @@ export default function GalleryPage() {
           </div>
         </div>
       </header>
+
+      {/* Welcome Banner for Family Members */}
+      {showWelcome && familyMember && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <WelcomeBanner
+            member={familyMember}
+            onDismiss={() => setShowWelcome(false)}
+          />
+        </div>
+      )}
 
       {/* Category Filter */}
       {settings.show_category_filter && (
