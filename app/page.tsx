@@ -125,7 +125,7 @@ function Navigation() {
                 }}
                 whileHover={{ scale: 1.02 }}
               >
-                Suborna <span className="text-rose-400 mx-1">&</span> Hridoy
+                Laboni <span className="text-rose-400 mx-1">&</span> Arif
               </motion.h1>
             </Link>
 
@@ -574,9 +574,9 @@ const WEDDING_SECTIONS = [
   {
     id: 5,
     type: 'countdown',
-    title: "Our First Anniversary",
-    subtitle: "Counting down the days",
-    description: "We are eagerly waiting to celebrate our first year of marriage. Every day has been a new chapter in our beautiful story.",
+    title: "Our Anniversary",
+    subtitle: "Married on November 1, 2024",
+    description: "Counting down to the next November 1 celebration of our marriage and memories together.",
     color: "bg-[#4a4a30]",
     textColor: "text-stone-100",
     image: "https://picsum.photos/seed/anniversary/1200/1600",
@@ -589,6 +589,17 @@ const STORY_SECTION_ANCHORS: Record<number, string> = {
   1: 'services',
   2: 'portfolio',
 };
+
+function getNextNovemberFirstTarget(): string {
+  const now = new Date();
+  const currentYearTarget = new Date(now.getFullYear(), 10, 1, 0, 0, 0, 0);
+
+  if (now.getTime() >= currentYearTarget.getTime()) {
+    currentYearTarget.setFullYear(currentYearTarget.getFullYear() + 1);
+  }
+
+  return currentYearTarget.toISOString();
+}
 
 function Sparkles({ className }: { className?: string }) {
   return (
@@ -615,6 +626,7 @@ export default function Home() {
   const y1 = useTransform(scrollY, [0, 500], [0, 150]);
   const opacity = useTransform(scrollY, [0, 300], [1, 0]);
   const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
+  const countdownTargetDate = getNextNovemberFirstTarget();
 
   return (
     <main className="relative antialiased selection:bg-rose-100 selection:text-rose-900">
@@ -658,7 +670,7 @@ export default function Home() {
             className="text-xs sm:text-sm uppercase tracking-[0.3em] text-white/80 font-sans font-medium mb-6"
             style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
           >
-            Suborna & Hridoy
+            Laboni & Adnan Arif
           </motion.p>
 
           <motion.h1
@@ -741,7 +753,7 @@ export default function Home() {
                 </p>
                 
                 {section.type === 'countdown' ? (
-                  <ShiftingCountdown targetDate="2026-06-15T00:00:00" />
+                  <ShiftingCountdown targetDate={countdownTargetDate} />
                 ) : (
                   <div className="mt-12 flex items-center gap-6">
                     <div className="flex flex-col">
@@ -814,7 +826,7 @@ export default function Home() {
           
           {/* Names */}
           <p className="text-2xl sm:text-3xl font-light italic mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
-            Suborna & Hridoy
+            Laboni & Adnan Arif
           </p>
           
           {/* Decorative divider */}
