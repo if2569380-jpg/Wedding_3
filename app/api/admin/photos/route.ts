@@ -21,8 +21,20 @@ export async function PATCH(request: NextRequest) {
 
     // Build update object
     const updates: { alt?: string; category?: string } = {}
-    if (alt !== undefined) updates.alt = alt
-    if (category !== undefined) updates.category = category
+    if (alt !== undefined) {
+      const normalizedAlt = typeof alt === 'string' ? alt.trim() : ''
+      if (!normalizedAlt) {
+        return NextResponse.json({ error: 'Photo title cannot be empty' }, { status: 400 })
+      }
+      updates.alt = normalizedAlt
+    }
+    if (category !== undefined) {
+      const normalizedCategory = typeof category === 'string' ? category.trim() : ''
+      if (!normalizedCategory) {
+        return NextResponse.json({ error: 'Category cannot be empty' }, { status: 400 })
+      }
+      updates.category = normalizedCategory
+    }
 
     if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No fields to update' }, { status: 400 })
@@ -39,6 +51,14 @@ export async function PATCH(request: NextRequest) {
 
     if (error) {
       console.error('Update error:', error)
+      if (error.code === '23514' && error.message.includes('gallery_images_category_check')) {
+        return NextResponse.json(
+          {
+            error: 'Category validation failed in database. Apply migration 005_allow_custom_gallery_categories.sql and try again.',
+          },
+          { status: 400 }
+        )
+      }
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
