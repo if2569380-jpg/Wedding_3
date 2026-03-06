@@ -56,10 +56,10 @@ function getTimeByUnit(unit: CountdownUnit, targetDate: string): number {
 
 function useTimer(unit: CountdownUnit, targetDate: string) {
   const [ref, animate] = useAnimate();
-  const initial = getTimeByUnit(unit, targetDate);
-  const [time, setTime] = useState(initial);
+  const [time, setTime] = useState(0);
+  const [hydrated, setHydrated] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const timeRef = useRef(initial);
+  const timeRef = useRef(0);
 
   const handleCountdown = useCallback(async () => {
     const newTime = getTimeByUnit(unit, targetDate);
@@ -87,7 +87,16 @@ function useTimer(unit: CountdownUnit, targetDate: string) {
   }, [animate, ref, targetDate, unit]);
 
   useEffect(() => {
-    handleCountdown();
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
+    const initialValue = getTimeByUnit(unit, targetDate);
+    timeRef.current = initialValue;
+    setTime(initialValue);
+
     intervalRef.current = setInterval(handleCountdown, SECOND);
 
     return () => {
@@ -95,7 +104,7 @@ function useTimer(unit: CountdownUnit, targetDate: string) {
         clearInterval(intervalRef.current);
       }
     };
-  }, [handleCountdown]);
+  }, [handleCountdown, hydrated, targetDate, unit]);
 
   return { ref, time };
 }
@@ -114,6 +123,7 @@ function CountdownItem({ unit, label, targetDate, itemClassName }: CountdownItem
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-60" />
       <span
         ref={ref}
+        suppressHydrationWarning
         className="relative block text-4xl font-semibold tracking-tight text-white drop-shadow-sm md:text-5xl lg:text-6xl"
       >
         {display}

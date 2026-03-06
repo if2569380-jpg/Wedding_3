@@ -592,13 +592,14 @@ const STORY_SECTION_ANCHORS: Record<number, string> = {
 
 function getNextNovemberFirstTarget(): string {
   const now = new Date();
-  const currentYearTarget = new Date(now.getFullYear(), 10, 1, 0, 0, 0, 0);
+  const currentYear = now.getUTCFullYear();
+  const currentYearTargetMs = Date.UTC(currentYear, 10, 1, 0, 0, 0, 0);
+  const nextTargetMs =
+    now.getTime() >= currentYearTargetMs
+      ? Date.UTC(currentYear + 1, 10, 1, 0, 0, 0, 0)
+      : currentYearTargetMs;
 
-  if (now.getTime() >= currentYearTarget.getTime()) {
-    currentYearTarget.setFullYear(currentYearTarget.getFullYear() + 1);
-  }
-
-  return currentYearTarget.toISOString();
+  return new Date(nextTargetMs).toISOString();
 }
 
 function Sparkles({ className }: { className?: string }) {
