@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabaseBrowser'
-import { Lock, Mail, ArrowRight, Heart } from 'lucide-react'
+import { Lock, Mail, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 export default function LoginForm() {
@@ -57,20 +57,17 @@ export default function LoginForm() {
   return (
     <>
       {/* Header */}
-      <div className="text-center mb-8">
-        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-stone-100 mb-4">
-          <Heart className="w-8 h-8 text-rose-400" />
-        </div>
-        <h1 className="text-3xl font-serif font-light text-stone-800 mb-2">
+      <div className="mb-6">
+        <h1 className="text-2xl font-serif font-light text-stone-800 mb-1">
           Welcome Back
         </h1>
-        <p className="text-stone-600 font-sans">
+        <p className="text-stone-600 font-sans text-sm">
           Sign in to view the wedding gallery
         </p>
       </div>
 
       {/* Login Form */}
-      <div className="bg-white rounded-2xl shadow-lg border border-stone-100 p-8">
+      <div className="bg-white rounded-2xl shadow-lg shadow-stone-200/50 border border-stone-100 p-6">
         {error && (
           <div className="mb-4 p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-sm">
             {error}
@@ -83,7 +80,7 @@ export default function LoginForm() {
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label
               htmlFor="email"
@@ -99,7 +96,7 @@ export default function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                 placeholder="you@example.com"
               />
             </div>
@@ -120,7 +117,7 @@ export default function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-3 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                 placeholder="Enter your password"
               />
             </div>
@@ -129,7 +126,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-stone-800 text-white py-3 px-6 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 bg-stone-800 text-white py-2.5 px-6 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -142,14 +139,14 @@ export default function LoginForm() {
           </button>
         </form>
 
-        <div className="mt-6 pt-6 border-t border-stone-100 text-center">
+        <div className="mt-4 pt-4 border-t border-stone-100 text-center">
           <Link href="/" className="text-stone-600 hover:text-stone-800 text-sm transition-colors">
             ← Back to Home
           </Link>
         </div>
       </div>
 
-      <p className="text-center text-stone-500 text-sm mt-8">
+      <p className="text-center text-stone-500 text-xs mt-6">
         This gallery is private and requires authentication.
       </p>
     </>

@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { 
   X, 
   ChevronLeft, 
@@ -20,14 +20,16 @@ import {
   Share2,
   Copy,
   Check,
-  LogOut
+  LogOut,
+  Search
 } from 'lucide-react';
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 import { useGallerySettings } from '@/app/providers';
+import WelcomeBanner from '@/components/WelcomeBanner';
 
 interface GalleryImage {
   id: string;
@@ -40,12 +42,127 @@ interface GalleryImage {
 
 const CATEGORIES = ['All', 'Ceremony', 'Reception', 'Portraits', 'Details'];
 
+// 3D Tilt Photo Card Component
+interface PhotoCardProps {
+  photo: GalleryImage;
+  index: number;
+  viewMode: 'masonry' | 'grid';
+  showWatermark: boolean;
+  watermarkText: string;
+  favorites: string[];
+  settings: {
+    allow_favorites: boolean;
+  };
+  onClick: () => void;
+  onToggleFavorite: (e: React.MouseEvent) => void;
+}
+
+function PhotoCard({ photo, index, viewMode, showWatermark, watermarkText, favorites, settings, onClick, onToggleFavorite }: PhotoCardProps) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tiltStyle, setTiltStyle] = useState({ transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)' });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+    const rotateX = ((y - centerY) / centerY) * -8;
+    const rotateY = ((x - centerX) / centerX) * 8;
+    setTiltStyle({
+      transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`,
+    });
+  };
+
+  const handleMouseLeave = () => {
+    setTiltStyle({ transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)' });
+  };
+
+  return (
+    <motion.div
+      ref={cardRef}
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.4, delay: index * 0.05 }}
+      onClick={onClick}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={tiltStyle}
+      className={`group relative cursor-pointer overflow-hidden rounded-xl transition-transform duration-200 ease-out ${
+        viewMode === 'masonry' ? 'break-inside-avoid' : 'aspect-square'
+      }`}
+    >
+      <Image
+        src={photo.src}
+        alt={photo.alt}
+        width={800}
+        height={600}
+        className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+          viewMode === 'grid' ? 'h-full' : 'h-auto'
+        }`}
+        referrerPolicy="no-referrer"
+        unoptimized
+      />
+
+      {showWatermark && (
+        <div className="absolute inset-0 pointer-events-none flex items-end justify-end p-3">
+          <span className="rounded-md bg-black/40 px-2 py-1 text-[10px] uppercase tracking-wider text-white/85 font-sans">
+            {watermarkText}
+          </span>
+        </div>
+      )}
+      
+      {/* Hover Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute bottom-0 left-0 right-0 p-4">
+          <p className="text-white font-serif text-lg">{photo.alt}</p>
+          <p className="text-white/70 text-xs uppercase tracking-widest font-sans mt-1">
+            {photo.category}
+          </p>
+        </div>
+        
+        {/* Favorite Button */}
+        {settings.allow_favorites && (
+          <button
+            onClick={onToggleFavorite}
+            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
+          >
+            <Heart
+              className={`w-5 h-5 transition-colors ${
+                favorites.includes(photo.id)
+                  ? 'text-rose-400 fill-rose-400'
+                  : 'text-white'
+              }`}
+            />
+          </button>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
+// Skeleton Loading Component
+function PhotoSkeleton({ viewMode }: { viewMode: 'masonry' | 'grid' }) {
+  return (
+    <div className={`animate-pulse bg-stone-200 rounded-xl overflow-hidden ${
+      viewMode === 'grid' ? 'aspect-square' : 'h-64'
+    }`}>
+      <div className="w-full h-full bg-gradient-to-r from-stone-200 via-stone-300 to-stone-200 animate-shimmer" />
+    </div>
+  );
+}
+
 export default function GalleryPage() {
   const { settings } = useGallerySettings();
   const [photos, setPhotos] = useState<GalleryImage[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<number | null>(null);
   const [favorites, setFavorites] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'masonry' | 'grid'>(settings.default_view_mode);
@@ -59,9 +176,47 @@ export default function GalleryPage() {
   const [shareMenuOpen, setShareMenuOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [visibleCount, setVisibleCount] = useState(20);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
   const slideshowRef = useRef<NodeJS.Timeout | null>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const lastTapTime = useRef<number>(0);
   const router = useRouter();
+
+  // Family member welcome state
+  const [familyMember, setFamilyMember] = useState<{
+    id: string;
+    name: string;
+    relationship: string | null;
+    welcome_message: string | null;
+    avatar_url: string | null;
+  } | null>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
+
+  // Fetch current user and family member data
+  useEffect(() => {
+    async function fetchFamilyMember() {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        
+        if (user?.email) {
+          const response = await fetch(`/api/family-members?email=${encodeURIComponent(user.email)}`);
+          const data = await response.json();
+          
+          if (data.members && data.members.length > 0) {
+            setFamilyMember(data.members[0]);
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching family member:', error);
+      }
+    }
+
+    fetchFamilyMember();
+  }, []);
 
   // Fetch photos from Supabase
   useEffect(() => {
@@ -99,9 +254,27 @@ export default function GalleryPage() {
     localStorage.setItem('gallery-favorites', JSON.stringify(favorites));
   }, [favorites]);
 
-  const filteredPhotos = selectedCategory === 'All'
-    ? photos
-    : photos.filter((photo) => photo.category === selectedCategory);
+  // Generate search suggestions based on photo names and categories
+  const suggestions = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    const photoNames = photos
+      .filter(p => p.alt.toLowerCase().includes(query))
+      .map(p => p.alt)
+      .slice(0, 5);
+    const categories = CATEGORIES.filter(c => 
+      c !== 'All' && c.toLowerCase().includes(query)
+    );
+    return [...new Set([...categories, ...photoNames])].slice(0, 8);
+  }, [searchQuery, photos]);
+
+  const filteredPhotos = photos.filter((photo) => {
+    const matchesCategory = selectedCategory === 'All' || photo.category === selectedCategory;
+    const matchesSearch = searchQuery === '' || 
+      photo.alt.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      photo.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
   const parsedItemsPerPage = Number(settings.items_per_page);
   const itemsPerPage = Number.isFinite(parsedItemsPerPage) && parsedItemsPerPage > 0
     ? Math.floor(parsedItemsPerPage)
@@ -115,6 +288,28 @@ export default function GalleryPage() {
   useEffect(() => {
     setVisibleCount(itemsPerPage);
   }, [itemsPerPage, selectedCategory, photos.length]);
+
+  // Infinite scroll with Intersection Observer
+  useEffect(() => {
+    if (!loadMoreRef.current || !canLoadMore) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && canLoadMore && !loadingMore) {
+          setLoadingMore(true);
+          // Simulate slight delay for smooth loading
+          setTimeout(() => {
+            setVisibleCount((prev) => prev + itemsPerPage);
+            setLoadingMore(false);
+          }, 300);
+        }
+      },
+      { rootMargin: '100px', threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+    return () => observer.disconnect();
+  }, [canLoadMore, loadingMore, itemsPerPage]);
 
   useEffect(() => {
     if (selectedPhoto === null) return;
@@ -307,6 +502,64 @@ export default function GalleryPage() {
     setIsDragging(false);
   }, []);
 
+  // Touch gesture handlers for mobile swipe navigation
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartY.current = e.touches[0].clientY;
+  }, []);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const diffX = touchStartX.current - touchX;
+    const diffY = touchStartY.current - touchY;
+
+    // Prevent default only for horizontal swipes to allow vertical scroll when not zoomed
+    if (zoomLevel > 1) {
+      e.preventDefault();
+    } else if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 10) {
+      e.preventDefault();
+    }
+  }, [zoomLevel]);
+
+  const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchStartX.current - touchEndX;
+    const diffY = touchStartY.current - touchEndY;
+
+    // Double tap detection for zoom
+    const currentTime = new Date().getTime();
+    const tapLength = currentTime - lastTapTime.current;
+    if (tapLength < 300 && tapLength > 0) {
+      // Double tap - toggle zoom
+      if (zoomLevel > 1) {
+        handleResetZoom();
+      } else {
+        setZoomLevel(2);
+      }
+      lastTapTime.current = 0;
+    } else {
+      lastTapTime.current = currentTime;
+    }
+
+    // Swipe detection (only when not zoomed)
+    if (zoomLevel === 1 && Math.abs(diffX) > Math.abs(diffY)) {
+      if (diffX > 50) {
+        goToNext(); // Swipe left - next image
+      } else if (diffX < -50) {
+        goToPrevious(); // Swipe right - previous image
+      }
+    }
+
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, [zoomLevel, goToNext, goToPrevious, handleResetZoom]);
+
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -374,10 +627,21 @@ export default function GalleryPage() {
         </div>
       </header>
 
-      {/* Category Filter */}
+      {/* Welcome Banner for Family Members */}
+      {showWelcome && familyMember && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+          <WelcomeBanner
+            member={familyMember}
+            onDismiss={() => setShowWelcome(false)}
+          />
+        </div>
+      )}
+
+      {/* Category Filter & Search */}
       {settings.show_category_filter && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-wrap justify-center gap-3">
+          {/* Categories, Search and Photo Count in one row */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
             {CATEGORIES.map((category) => (
               <button
                 key={category}
@@ -391,20 +655,63 @@ export default function GalleryPage() {
                 {category}
               </button>
             ))}
+            
+            {/* Search Input with Suggestions */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 z-10" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => {
+                  setSearchQuery(e.target.value);
+                  setShowSuggestions(true);
+                }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                className="w-40 pl-9 pr-4 py-2 rounded-full border border-stone-200 bg-white text-sm focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+              />
+              
+              {/* Suggestions Dropdown */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 py-2 z-50 min-w-[200px]">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSearchQuery(suggestion);
+                        setShowSuggestions(false);
+                      }}
+                      className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                    >
+                      <Search className="w-3 h-3 text-stone-400" />
+                      <span className="truncate">{suggestion}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            {settings.show_photo_count && (
+              <span className="text-stone-500 font-sans text-sm">
+                • {displayedCount} of {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
+              </span>
+            )}
           </div>
-          {settings.show_photo_count && (
-            <p className="text-center text-stone-500 font-sans text-sm mt-4">
-              {displayedCount} of {filteredPhotos.length} photo{filteredPhotos.length !== 1 ? 's' : ''}
-            </p>
-          )}
         </div>
       )}
 
       {/* Photo Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
         {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="w-12 h-12 border-4 border-stone-200 border-t-stone-800 rounded-full animate-spin" />
+          <div className={
+            viewMode === 'masonry'
+              ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4'
+              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+          }>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <PhotoSkeleton key={i} viewMode={viewMode} />
+            ))}
           </div>
         ) : error ? (
           <div className="text-center py-20">
@@ -432,78 +739,34 @@ export default function GalleryPage() {
             >
               <AnimatePresence mode="popLayout">
                 {visiblePhotos.map((photo, index) => (
-                  <motion.div
+                  <PhotoCard
                     key={photo.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.4, delay: index * 0.05 }}
+                    photo={photo}
+                    index={index}
+                    viewMode={viewMode}
+                    showWatermark={showWatermark}
+                    watermarkText={watermarkText}
+                    favorites={favorites}
+                    settings={{ allow_favorites: settings.allow_favorites }}
                     onClick={() => openLightbox(index)}
-                    className={`group relative cursor-pointer overflow-hidden rounded-xl ${
-                      viewMode === 'masonry' ? 'break-inside-avoid' : 'aspect-square'
-                    }`}
-                  >
-                    <Image
-                      src={photo.src}
-                      alt={photo.alt}
-                      width={800}
-                      height={600}
-                      className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
-                        viewMode === 'grid' ? 'h-full' : 'h-auto'
-                      }`}
-                      referrerPolicy="no-referrer"
-                      unoptimized
-                    />
-
-                    {showWatermark && (
-                      <div className="absolute inset-0 pointer-events-none flex items-end justify-end p-3">
-                        <span className="rounded-md bg-black/40 px-2 py-1 text-[10px] uppercase tracking-wider text-white/85 font-sans">
-                          {watermarkText}
-                        </span>
-                      </div>
-                    )}
-                    
-                    {/* Hover Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="absolute bottom-0 left-0 right-0 p-4">
-                        <p className="text-white font-serif text-lg">{photo.alt}</p>
-                        <p className="text-white/70 text-xs uppercase tracking-widest font-sans mt-1">
-                          {photo.category}
-                        </p>
-                      </div>
-                      
-                      {/* Favorite Button */}
-                      {settings.allow_favorites && (
-                        <button
-                          onClick={(e) => toggleFavorite(photo.id, e)}
-                          className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
-                        >
-                          <Heart
-                            className={`w-5 h-5 transition-colors ${
-                              favorites.includes(photo.id)
-                                ? 'text-rose-400 fill-rose-400'
-                                : 'text-white'
-                            }`}
-                          />
-                        </button>
-                      )}
-                    </div>
-                  </motion.div>
+                    onToggleFavorite={(e) => toggleFavorite(photo.id, e)}
+                  />
                 ))}
               </AnimatePresence>
             </motion.div>
-            {canLoadMore && (
-              <div className="mt-8 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setVisibleCount((prev) => prev + itemsPerPage)}
-                  className="px-6 py-3 rounded-xl bg-stone-800 text-white font-sans text-sm uppercase tracking-wider hover:bg-stone-700 transition-colors"
-                >
-                  Load more photos
-                </button>
-              </div>
-            )}
+            
+            {/* Infinite scroll trigger and loading indicator */}
+            <div ref={loadMoreRef} className="mt-8 flex justify-center">
+              {loadingMore && (
+                <div className="flex items-center gap-3 text-stone-500">
+                  <div className="w-6 h-6 border-3 border-stone-300 border-t-stone-600 rounded-full animate-spin" />
+                  <span className="text-sm font-sans">Loading more...</span>
+                </div>
+              )}
+              {canLoadMore && !loadingMore && (
+                <div className="h-8" /> /* Spacer for intersection observer */
+              )}
+            </div>
           </>
         )}
       </div>
@@ -668,19 +931,22 @@ export default function GalleryPage() {
               <ChevronRight className="w-6 h-6 text-white" />
             </button>
 
-            {/* Image Container with Zoom & Pan */}
+            {/* Image Container with Zoom & Pan + Touch Gestures */}
             <motion.div
               key={selectedPhoto}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="relative max-w-[90vw] max-h-[85vh] overflow-hidden"
+              className="relative max-w-[90vw] max-h-[85vh] overflow-hidden touch-none"
               onClick={(e) => e.stopPropagation()}
               ref={imageContainerRef}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
             >
               <div
-                className="relative cursor-move"
+                className={`relative cursor-move ${isSlideshow ? 'animate-ken-burns' : ''}`}
                 style={{
                   transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
                   transition: isDragging ? 'none' : 'transform 0.3s ease-out',

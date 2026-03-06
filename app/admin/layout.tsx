@@ -13,7 +13,8 @@ import {
   X,
   Heart,
   ChevronRight,
-  Music
+  Music,
+  Users
 } from 'lucide-react'
 import { createClient } from '@/lib/supabaseBrowser'
 import { useRouter } from 'next/navigation'
@@ -23,6 +24,7 @@ const navigation = [
   { name: 'Upload Photos', href: '/admin/upload', icon: ImagePlus },
   { name: 'Manage Photos', href: '/admin/photos', icon: Images },
   { name: 'Music', href: '/admin/music', icon: Music },
+  { name: 'Family Members', href: '/admin/family-members', icon: Users },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ]
 
