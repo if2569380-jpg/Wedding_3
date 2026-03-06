@@ -28,8 +28,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // output: 'export' removed - API routes require server-side rendering
-  distDir: 'dist',
+  // Keep default `.next` output so Vercel can find Next build artifacts.
   transpilePackages: ['motion'],
   turbopack: {
     // Turbopack configuration for Next.js 16
