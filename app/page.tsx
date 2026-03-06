@@ -5,6 +5,7 @@ import { Heart, Calendar, MapPin, Camera, Music, Timer, ChevronDown, Images, Vol
 import Image from 'next/image';
 import { useState, useEffect, useSyncExternalStore, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import ShiftingCountdown from '@/components/ui/countdown-timer';
 
 function FloralDivider() {
   return (
@@ -582,53 +583,6 @@ function Sparkles({ className }: { className?: string }) {
   );
 }
 
-function CountdownTimer() {
-  const [timeLeft, setTimeLeft] = useState({
-    days: 0,
-    hours: 0,
-    minutes: 0,
-    seconds: 0
-  });
-
-  useEffect(() => {
-    const targetDate = new Date('2026-06-15T00:00:00').getTime();
-
-    const interval = setInterval(() => {
-      const now = new Date().getTime();
-      const difference = targetDate - now;
-
-      if (difference > 0) {
-        setTimeLeft({
-          days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-          hours: Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-          minutes: Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60)),
-          seconds: Math.floor((difference % (1000 * 60)) / 1000)
-        });
-      } else {
-        clearInterval(interval);
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <div className="grid grid-cols-4 gap-4 mt-8">
-      {[
-        { label: 'Days', value: timeLeft.days },
-        { label: 'Hours', value: timeLeft.hours },
-        { label: 'Mins', value: timeLeft.minutes },
-        { label: 'Secs', value: timeLeft.seconds },
-      ].map((item) => (
-        <div key={item.label} className="flex flex-col items-center">
-          <span className="text-3xl md:text-5xl font-serif font-light">{item.value}</span>
-          <span className="text-[10px] uppercase tracking-widest font-sans opacity-60 mt-2">{item.label}</span>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 export default function Home() {
   return (
     <main className="relative antialiased selection:bg-rose-100 selection:text-rose-900">
@@ -642,7 +596,7 @@ export default function Home() {
           className="absolute inset-0 z-0"
         >
           <Image 
-            src="https://images.unsplash.com/photo-1519741497674-611481863552?w=1920&q=80" 
+            src="https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/hero-image-1772817907417.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvaGVyby1pbWFnZS0xNzcyODE3OTA3NDE3LmpmaWYiLCJpYXQiOjE3NzI4MTc5MjAsImV4cCI6MTc3MjgyMTUyMH0.QD33c9HjVHFSkuCmKbn6kWksl0AxxruJoLQRjroLk_4" 
             alt="Wedding couple" 
             fill 
             className="object-cover"
@@ -732,7 +686,7 @@ export default function Home() {
                 </p>
                 
                 {section.type === 'countdown' ? (
-                  <CountdownTimer />
+                  <ShiftingCountdown targetDate="2026-06-15T00:00:00" />
                 ) : (
                   <div className="mt-12 flex items-center gap-6">
                     <div className="flex flex-col">
