@@ -14,15 +14,15 @@ const LoginForm = dynamic(() => import('./LoginForm'), {
 
 export default function LoginPage() {
   return (
-    <main className="h-screen bg-[#fdfcf8] flex overflow-hidden">
+    <main className="min-h-svh bg-[#fdfcf8] flex overflow-x-hidden">
       {/* Left Side - Form */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-12 lg:px-16 xl:px-24 py-6">
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-10 lg:px-16 xl:px-24 py-8 sm:py-10">
         {/* Logo/Brand */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-6"
+          className="mb-5 sm:mb-6"
         >
           <Link href="/" className="inline-flex items-center gap-2">
             <Heart className="w-6 h-6 text-rose-400" />
@@ -55,7 +55,7 @@ export default function LoginPage() {
       </div>
 
       {/* Right Side - Image */}
-      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden">
+      <div className="hidden lg:block lg:w-1/2 relative overflow-hidden min-h-svh">
         {/* Background Image */}
         <motion.div
           initial={{ scale: 1.1, opacity: 0 }}

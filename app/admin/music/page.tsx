@@ -9,13 +9,13 @@ import {
   Save,
   X,
   Check,
-  GripVertical,
   Volume2,
   VolumeX,
   ExternalLink,
   AlertCircle,
   RefreshCw,
-  Youtube
+  Youtube,
+  MoreVertical
 } from 'lucide-react'
 
 interface Song {
@@ -36,6 +36,8 @@ export default function AdminMusic() {
   const [isAdding, setIsAdding] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
+  const [openActionMenuFor, setOpenActionMenuFor] = useState<string | null>(null)
+  const [actionMenuDirection, setActionMenuDirection] = useState<'up' | 'down'>('down')
 
   // Form state
   const [formData, setFormData] = useState({
@@ -49,6 +51,28 @@ export default function AdminMusic() {
 
   useEffect(() => {
     fetchSongs()
+  }, [])
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target?.closest('[data-song-actions]')) return
+      setOpenActionMenuFor(null)
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpenActionMenuFor(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [])
 
   async function fetchSongs() {
@@ -207,6 +231,34 @@ export default function AdminMusic() {
     setEditingId(null)
   }
 
+  const getSourceLabel = (song: Song) => {
+    if (song.source_type === 'youtube') {
+      return song.src.replace(/^https?:\/\//, '')
+    }
+
+    const parts = song.src.split('/').filter(Boolean)
+    return parts.at(-1) || song.src
+  }
+
+  const handleToggleActionMenu = (
+    songId: string,
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (openActionMenuFor === songId) {
+      setOpenActionMenuFor(null)
+      return
+    }
+
+    const rect = event.currentTarget.getBoundingClientRect()
+    const estimatedMenuHeight = 148
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    const shouldOpenUp = spaceBelow < estimatedMenuHeight && spaceAbove > spaceBelow
+
+    setActionMenuDirection(shouldOpenUp ? 'up' : 'down')
+    setOpenActionMenuFor(songId)
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -216,22 +268,31 @@ export default function AdminMusic() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-serif text-stone-800 mb-2">Music Management</h1>
-          <p className="text-stone-600 font-sans">
-            Manage background music for the wedding gallery
-          </p>
+      <div className="rounded-2xl border border-stone-200 bg-gradient-to-br from-white to-stone-50 p-4 sm:p-6 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2.5 mb-1.5">
+              <span className="w-9 h-9 rounded-xl bg-rose-100 text-rose-600 inline-flex items-center justify-center">
+                <Music className="w-5 h-5" />
+              </span>
+              <h1 className="text-2xl sm:text-3xl font-serif text-stone-800 leading-tight">Music Management</h1>
+            </div>
+            <p className="text-stone-600 font-sans text-sm sm:text-base">
+              Manage background music for the wedding gallery
+            </p>
+          </div>
+
+          <button
+            onClick={() => fetchSongs()}
+            className="min-h-10 px-3 sm:px-4 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 transition-colors inline-flex items-center gap-2 text-stone-700 font-sans text-sm shrink-0"
+            title="Refresh"
+          >
+            <RefreshCw className="w-4 h-4" />
+            <span className="hidden sm:inline">Refresh</span>
+          </button>
         </div>
-        <button
-          onClick={() => fetchSongs()}
-          className="p-3 rounded-xl bg-stone-100 hover:bg-stone-200 transition-colors"
-          title="Refresh"
-        >
-          <RefreshCw className="w-5 h-5 text-stone-600" />
-        </button>
       </div>
 
       {error && (
@@ -248,7 +309,7 @@ export default function AdminMusic() {
             resetForm()
             setIsAdding(true)
           }}
-          className="w-full flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-stone-300 hover:border-rose-400 hover:bg-rose-50 transition-all font-sans text-stone-600 hover:text-rose-600"
+          className="w-full min-h-11 flex items-center justify-center gap-2 p-4 rounded-xl border-2 border-dashed border-stone-300 hover:border-rose-400 hover:bg-rose-50 transition-all font-sans text-stone-600 hover:text-rose-600 text-base"
         >
           <Plus className="w-5 h-5" />
           Add New Song
@@ -258,13 +319,13 @@ export default function AdminMusic() {
       {/* Add/Edit Form */}
       {(isAdding || editingId) && (
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-          <div className="p-6 border-b border-stone-100 bg-gradient-to-r from-rose-50 to-pink-50">
+          <div className="p-5 sm:p-6 border-b border-stone-100 bg-gradient-to-r from-rose-50 to-pink-50">
             <h2 className="text-xl font-serif text-stone-800 flex items-center gap-2">
               <Music className="w-5 h-5 text-rose-400" />
               {editingId ? 'Edit Song' : 'Add New Song'}
             </h2>
           </div>
-          <div className="p-6 space-y-4">
+          <div className="p-5 sm:p-6 space-y-4">
             <div>
               <label className="block text-sm font-medium text-stone-700 font-sans mb-2">
                 Song Title *
@@ -274,7 +335,7 @@ export default function AdminMusic() {
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="Enter song title"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+                className="w-full min-h-11 px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
               />
             </div>
 
@@ -287,7 +348,7 @@ export default function AdminMusic() {
                 value={formData.artist}
                 onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
                 placeholder="Enter artist name (optional)"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+                className="w-full min-h-11 px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
               />
             </div>
 
@@ -309,7 +370,7 @@ export default function AdminMusic() {
                     });
                   }}
                   placeholder="/music/song.mp3 or https://youtube.com/watch?v=..."
-                  className="w-full px-4 py-3 pr-12 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+                  className="w-full min-h-11 px-4 py-3 pr-12 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
                 />
                 <ExternalLink className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
               </div>
@@ -340,11 +401,11 @@ export default function AdminMusic() {
               </label>
             </div>
 
-            <div className="flex gap-3 pt-4">
+            <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <button
                 onClick={() => editingId ? handleUpdate(editingId) : handleAdd()}
                 disabled={saving}
-                className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-stone-800 text-white rounded-xl font-sans font-medium hover:bg-stone-700 transition-colors disabled:opacity-50"
+                className="w-full sm:flex-1 min-h-11 flex items-center justify-center gap-2 px-6 py-3 bg-stone-800 text-white rounded-xl font-sans font-medium hover:bg-stone-700 transition-colors disabled:opacity-50"
               >
                 {saving ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -355,7 +416,7 @@ export default function AdminMusic() {
               </button>
               <button
                 onClick={cancelEditing}
-                className="px-6 py-3 bg-stone-100 text-stone-700 rounded-xl font-sans font-medium hover:bg-stone-200 transition-colors"
+                className="w-full sm:w-auto min-h-11 px-6 py-3 bg-stone-100 text-stone-700 rounded-xl font-sans font-medium hover:bg-stone-200 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -366,13 +427,16 @@ export default function AdminMusic() {
 
       {/* Songs List */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-        <div className="p-6 border-b border-stone-100">
+        <div className="p-5 sm:p-6 border-b border-stone-100">
           <h2 className="text-xl font-serif text-stone-800 flex items-center gap-2">
             <Volume2 className="w-5 h-5 text-rose-400" />
-            Playlist ({songs.length} songs)
+            Playlist
+            <span className="ml-1 px-2.5 py-0.5 rounded-full bg-stone-100 text-stone-600 text-xs font-sans">
+              {songs.length} songs
+            </span>
           </h2>
         </div>
-        <div className="divide-y divide-stone-100">
+        <div className="p-2 sm:p-3 space-y-2.5 sm:space-y-3">
           {songs.length === 0 ? (
             <div className="p-12 text-center text-stone-500 font-sans">
               <Music className="w-12 h-12 mx-auto mb-4 text-stone-300" />
@@ -382,72 +446,100 @@ export default function AdminMusic() {
             songs.map((song, index) => (
               <div
                 key={song.id}
-                className="p-4 flex items-center gap-4 hover:bg-stone-50 transition-colors group"
+                className="rounded-xl border border-stone-200 bg-white p-3 sm:p-4 grid grid-cols-[1fr_auto] gap-3 items-start hover:border-stone-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.04)] transition-all"
               >
-                <div className="flex flex-col items-center gap-1 text-stone-400">
-                  <GripVertical className="w-4 h-4" />
-                  <span className="text-xs font-sans">{index + 1}</span>
-                </div>
-
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-sans font-medium text-stone-800 truncate">
-                      {song.title}
-                    </h3>
-                    {song.source_type === 'youtube' && (
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-red-100 text-red-600 font-sans flex items-center gap-1">
-                        <Youtube className="w-3 h-3" />
-                        YouTube
-                      </span>
-                    )}
-                    {!song.is_active && (
-                      <span className="px-2 py-0.5 text-xs rounded-full bg-stone-200 text-stone-600 font-sans">
-                        Inactive
-                      </span>
-                    )}
+                  <div className="flex items-start gap-2.5 min-w-0">
+                    <span className="mt-1 inline-flex w-6 h-6 shrink-0 items-center justify-center rounded-full bg-stone-100 text-[11px] font-semibold text-stone-500 font-sans">
+                      {index + 1}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <h3 className="font-sans font-semibold text-stone-800 truncate text-xl leading-snug">
+                          {song.title}
+                        </h3>
+                        {song.source_type === 'youtube' && (
+                          <span className="px-2 py-0.5 text-[11px] rounded-full bg-red-100 text-red-600 font-sans inline-flex items-center gap-1">
+                            <Youtube className="w-3 h-3" />
+                            YouTube
+                          </span>
+                        )}
+                        {!song.is_active && (
+                          <span className="px-2 py-0.5 text-[11px] rounded-full bg-stone-200 text-stone-600 font-sans">
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+
+                      {song.artist && (
+                        <p className="text-sm text-stone-600 font-sans truncate mt-0.5">
+                          {song.artist}
+                        </p>
+                      )}
+
+                      <p className="text-xs text-stone-400 font-sans mt-1 flex max-w-full items-center gap-1.5 bg-stone-50 border border-stone-100 rounded-md px-2 py-1 overflow-hidden">
+                        <ExternalLink className="w-3 h-3 shrink-0" />
+                        <span className="truncate min-w-0">{getSourceLabel(song)}</span>
+                      </p>
+                    </div>
                   </div>
-                  {song.artist && (
-                    <p className="text-sm text-stone-500 font-sans truncate">
-                      {song.artist}
-                    </p>
-                  )}
-                  <p className="text-xs text-stone-400 font-sans truncate mt-0.5">
-                    {song.src}
-                  </p>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="relative self-start" data-song-actions={song.id}>
                   <button
-                    onClick={() => handleToggleActive(song)}
-                    className={`p-2 rounded-lg transition-colors ${
-                      song.is_active
-                        ? 'bg-rose-100 text-rose-600 hover:bg-rose-200'
-                        : 'bg-stone-100 text-stone-400 hover:bg-stone-200'
-                    }`}
-                    title={song.is_active ? 'Active' : 'Inactive'}
+                    onClick={(event) => handleToggleActionMenu(song.id, event)}
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors inline-flex items-center justify-center"
+                    title="More actions"
                   >
-                    {song.is_active ? (
-                      <Volume2 className="w-4 h-4" />
-                    ) : (
-                      <VolumeX className="w-4 h-4" />
-                    )}
+                    <MoreVertical className="w-4 h-4" />
                   </button>
 
-                  <button
-                    onClick={() => startEditing(song)}
-                    className="p-2 rounded-lg bg-stone-100 text-stone-600 hover:bg-stone-200 transition-colors"
-                    title="Edit"
-                  >
-                    <Edit2 className="w-4 h-4" />
-                  </button>
+                  {openActionMenuFor === song.id && (
+                    <div
+                      className={`absolute right-0 z-20 w-44 rounded-xl border border-stone-200 bg-white shadow-xl overflow-hidden ${
+                        actionMenuDirection === 'up'
+                          ? 'bottom-[calc(100%+0.35rem)]'
+                          : 'top-[calc(100%+0.35rem)]'
+                      }`}
+                    >
+                      <button
+                        onClick={() => {
+                          handleToggleActive(song)
+                          setOpenActionMenuFor(null)
+                        }}
+                        className={`w-full px-3 py-2.5 text-sm font-sans text-left inline-flex items-center gap-2 transition-colors ${
+                          song.is_active
+                            ? 'text-rose-700 hover:bg-rose-50'
+                            : 'text-emerald-700 hover:bg-emerald-50'
+                        }`}
+                      >
+                        {song.is_active ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                        {song.is_active ? 'Deactivate' : 'Activate'}
+                      </button>
 
-                  <button
-                    onClick={() => handleDelete(song.id)}
-                    className="p-2 rounded-lg bg-stone-100 text-rose-600 hover:bg-rose-100 transition-colors"
-                    title="Delete"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                      <button
+                        onClick={() => {
+                          startEditing(song)
+                          setOpenActionMenuFor(null)
+                        }}
+                        className="w-full px-3 py-2.5 text-sm font-sans text-left text-stone-700 hover:bg-stone-50 inline-flex items-center gap-2 transition-colors"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                        Edit Song
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          handleDelete(song.id)
+                          setOpenActionMenuFor(null)
+                        }}
+                        className="w-full px-3 py-2.5 text-sm font-sans text-left text-rose-700 hover:bg-rose-50 inline-flex items-center gap-2 transition-colors"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete Song
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))
@@ -456,7 +548,7 @@ export default function AdminMusic() {
       </div>
 
       {/* Info Card */}
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 sm:p-6">
         <h3 className="text-lg font-serif text-blue-800 mb-2 flex items-center gap-2">
           <Check className="w-5 h-5" />
           Music Settings

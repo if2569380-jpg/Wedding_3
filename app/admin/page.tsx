@@ -86,21 +86,21 @@ export default function AdminDashboard() {
   ]
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Welcome */}
-      <div className="bg-gradient-to-r from-rose-400 via-rose-500 to-pink-500 rounded-2xl p-8 text-white shadow-xl shadow-rose-200">
-        <h1 className="text-3xl font-serif font-light mb-2">Welcome to Wedding Admin</h1>
+      <div className="bg-gradient-to-r from-rose-400 via-rose-500 to-pink-500 rounded-2xl p-5 sm:p-8 text-white shadow-xl shadow-rose-200">
+        <h1 className="text-2xl sm:text-3xl font-serif font-light mb-2">Welcome to Wedding Admin</h1>
         <p className="text-white/80 font-sans">
           Manage your wedding photo gallery, upload new memories, and organize your collection.
         </p>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {statCards.map((stat) => (
           <div
             key={stat.name}
-            className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100 hover:shadow-md transition-shadow"
+            className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-4">
               <div
@@ -124,8 +124,8 @@ export default function AdminDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+        <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100">
           <h2 className="text-xl font-serif text-stone-800 mb-4 flex items-center gap-2">
             <TrendingUp className="w-5 h-5 text-rose-400" />
             Quick Actions
@@ -133,7 +133,7 @@ export default function AdminDashboard() {
           <div className="space-y-3">
             <a
               href="/admin/upload"
-              className="flex items-center gap-4 p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors group"
+              className="flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors group min-h-11"
             >
               <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center group-hover:bg-rose-200 transition-colors">
                 <ImageIcon className="w-5 h-5 text-rose-600" />
@@ -145,7 +145,7 @@ export default function AdminDashboard() {
             </a>
             <a
               href="/admin/photos"
-              className="flex items-center gap-4 p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors group"
+              className="flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-xl bg-stone-50 hover:bg-stone-100 transition-colors group min-h-11"
             >
               <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
                 <Camera className="w-5 h-5 text-blue-600" />
@@ -159,7 +159,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Categories */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm border border-stone-100">
+        <div className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100">
           <h2 className="text-xl font-serif text-stone-800 mb-4 flex items-center gap-2">
             <Heart className="w-5 h-5 text-rose-400" />
             Categories
@@ -178,7 +178,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Tips */}
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 sm:p-6">
         <h3 className="text-lg font-serif text-blue-800 mb-2">💡 Pro Tips</h3>
         <ul className="space-y-2 text-sm text-blue-700 font-sans">
           <li>• Upload high-resolution images for the best viewing experience</li>

@@ -187,8 +187,8 @@ export default function LoginForm() {
   return (
     <>
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-serif font-light text-stone-800 mb-1">
+      <div className="mb-5 sm:mb-6">
+        <h1 className="text-xl sm:text-2xl font-serif font-light text-stone-800 mb-1">
           Welcome Back
         </h1>
         <p className="text-stone-600 font-sans text-sm">
@@ -197,7 +197,7 @@ export default function LoginForm() {
       </div>
 
       {/* Login Form */}
-      <div className="bg-white rounded-2xl shadow-lg shadow-stone-200/50 border border-stone-100 p-6">
+      <div className="bg-white rounded-2xl shadow-lg shadow-stone-200/50 border border-stone-100 p-5 sm:p-6">
         {error && (
           <div className="mb-4 p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-sm">
             {error}
@@ -226,7 +226,7 @@ export default function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                className="w-full min-h-11 pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                 placeholder="you@example.com"
               />
             </div>
@@ -247,7 +247,7 @@ export default function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                className="w-full min-h-11 pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                 placeholder="Enter your password"
               />
             </div>
@@ -256,7 +256,7 @@ export default function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-stone-800 text-white py-2.5 px-6 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full min-h-11 flex items-center justify-center gap-2 bg-stone-800 text-white py-2.5 px-6 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -276,13 +276,13 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <p className="text-center text-stone-500 text-xs mt-6">
+      <p className="text-center text-stone-500 text-xs mt-5 sm:mt-6">
         This gallery is private and requires authentication.
       </p>
 
       {showSetPasswordDialog && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="w-full max-w-md rounded-2xl bg-white border border-stone-200 shadow-2xl p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
+          <div className="w-full max-w-md max-h-[90svh] overflow-y-auto rounded-2xl bg-white border border-stone-200 shadow-2xl p-5 sm:p-6">
             <h2 className="text-xl font-serif font-light text-stone-800 mb-1">
               Set Your Password
             </h2>
@@ -313,7 +313,7 @@ export default function LoginForm() {
                     onChange={(e) => setInvitePassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                    className="w-full min-h-11 pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                     placeholder="Minimum 8 characters"
                   />
                 </div>
@@ -335,7 +335,7 @@ export default function LoginForm() {
                     onChange={(e) => setConfirmInvitePassword(e.target.value)}
                     required
                     minLength={8}
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                    className="w-full min-h-11 pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                     placeholder="Re-enter your password"
                   />
                 </div>
@@ -344,7 +344,7 @@ export default function LoginForm() {
               <button
                 type="submit"
                 disabled={inviteSaving || inviteChecking}
-                className="w-full flex items-center justify-center gap-2 bg-stone-800 text-white py-2.5 px-6 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full min-h-11 flex items-center justify-center gap-2 bg-stone-800 text-white py-2.5 px-6 rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {inviteSaving || inviteChecking ? (
                   <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />

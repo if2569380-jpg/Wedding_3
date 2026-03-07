@@ -436,7 +436,7 @@ export default function PhotosPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -473,8 +473,8 @@ export default function PhotosPage() {
       )}
 
       {/* Filters */}
-      <div className="bg-white rounded-xl p-4 shadow-sm border border-stone-200 space-y-4">
-        <div className="flex flex-col sm:flex-row gap-4">
+      <div className="bg-white rounded-xl p-3 sm:p-4 shadow-sm border border-stone-200 space-y-4">
+        <div className="flex flex-col lg:flex-row gap-3 sm:gap-4">
           {/* Search */}
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-stone-400" />
@@ -483,17 +483,17 @@ export default function PhotosPage() {
               placeholder="Search photos..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+              className="w-full min-h-11 pl-10 pr-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
             />
           </div>
 
           {/* Category Filter */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 w-full lg:w-auto">
             <Filter className="w-5 h-5 text-stone-400" />
             <select
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans bg-white"
+              className="flex-1 lg:flex-none min-h-11 px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans bg-white"
             >
               {allCategories.map((cat: string) => (
                 <option key={cat} value={cat}>
@@ -503,7 +503,7 @@ export default function PhotosPage() {
             </select>
             <button
               onClick={() => setShowAddCategory(true)}
-              className="p-2 rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors"
+              className="min-h-11 min-w-11 p-2 rounded-lg bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors"
               title="Add new category"
               disabled={loadingCategories || persistingCategories}
             >
@@ -512,10 +512,10 @@ export default function PhotosPage() {
           </div>
 
           {/* View Mode */}
-          <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-1">
+          <div className="flex items-center gap-1 bg-stone-100 rounded-lg p-1 self-start">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-2 rounded-md transition-colors ${
+              className={`min-h-10 min-w-10 p-2 rounded-md transition-colors ${
                 viewMode === 'grid'
                   ? 'bg-white text-stone-800 shadow-sm'
                   : 'text-stone-500 hover:text-stone-700'
@@ -525,7 +525,7 @@ export default function PhotosPage() {
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`p-2 rounded-md transition-colors ${
+              className={`min-h-10 min-w-10 p-2 rounded-md transition-colors ${
                 viewMode === 'list'
                   ? 'bg-white text-stone-800 shadow-sm'
                   : 'text-stone-500 hover:text-stone-700'
@@ -537,7 +537,7 @@ export default function PhotosPage() {
         </div>
 
         {/* Select All */}
-        <div className="flex items-center gap-2 pt-2 border-t border-stone-100">
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-stone-100">
           <button
             onClick={selectAll}
             className="text-sm text-stone-600 hover:text-stone-800 font-sans flex items-center gap-2"
@@ -556,11 +556,11 @@ export default function PhotosPage() {
           </button>
 
           {selectedPhotos.size > 0 && (
-            <div className="ml-auto flex flex-wrap items-center gap-2">
+            <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap items-center gap-2">
               <select
                 value={bulkCategory}
                 onChange={(e) => setBulkCategory(e.target.value)}
-                className="px-3 py-2 rounded-lg border border-stone-200 text-sm font-sans bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none"
+                className="w-full sm:w-auto min-h-10 px-3 py-2 rounded-lg border border-stone-200 text-sm font-sans bg-white focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none"
               >
                 {selectableCategories.map((category) => (
                   <option key={category} value={category}>
@@ -571,14 +571,14 @@ export default function PhotosPage() {
               <button
                 onClick={handleBulkCategoryUpdate}
                 disabled={bulkUpdatingCategory || selectableCategories.length === 0}
-                className="px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-sans hover:bg-blue-700 transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto min-h-10 px-3 py-2 rounded-lg bg-blue-600 text-white text-sm font-sans hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
                 {bulkUpdatingCategory ? 'Updating...' : 'Apply Category'}
               </button>
               <button
                 onClick={() => setBulkDeleteConfirm(true)}
                 disabled={bulkDeleting}
-                className="px-3 py-2 rounded-lg bg-rose-600 text-white text-sm font-sans hover:bg-rose-700 transition-colors disabled:opacity-50"
+                className="w-full sm:w-auto min-h-10 px-3 py-2 rounded-lg bg-rose-600 text-white text-sm font-sans hover:bg-rose-700 transition-colors disabled:opacity-50"
               >
                 {bulkDeleting ? 'Deleting...' : `Delete Selected (${selectedPhotos.size})`}
               </button>
@@ -593,7 +593,7 @@ export default function PhotosPage() {
           <p className="text-stone-500 font-sans">No photos found</p>
         </div>
       ) : viewMode === 'grid' ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
           {filteredPhotos.map((photo) => (
             <div
               key={photo.id}
@@ -676,7 +676,8 @@ export default function PhotosPage() {
       ) : (
         /* List View */
         <div className="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[760px]">
             <thead className="bg-stone-50 border-b border-stone-200">
               <tr>
                 <th className="px-4 py-3 text-left">
@@ -788,13 +789,14 @@ export default function PhotosPage() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-md w-full max-h-[90svh] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-rose-600" />
@@ -807,10 +809,10 @@ export default function PhotosPage() {
               This action cannot be undone. The photo will be permanently
               removed from the gallery and storage.
             </p>
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
                 disabled={deleting}
               >
                 Cancel
@@ -818,7 +820,7 @@ export default function PhotosPage() {
               <button
                 onClick={() => handleDelete(deleteConfirm)}
                 disabled={deleting}
-                className="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {deleting ? (
                   <>
@@ -839,8 +841,8 @@ export default function PhotosPage() {
 
       {/* Bulk Delete Confirmation Modal */}
       {bulkDeleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-md w-full max-h-[90svh] overflow-y-auto shadow-xl">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-12 h-12 rounded-full bg-rose-100 flex items-center justify-center">
                 <AlertCircle className="w-6 h-6 text-rose-600" />
@@ -852,10 +854,10 @@ export default function PhotosPage() {
             <p className="text-stone-600 font-sans mb-6">
               This action cannot be undone. Selected photos will be removed from gallery and storage.
             </p>
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
               <button
                 onClick={() => setBulkDeleteConfirm(false)}
-                className="px-4 py-2 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
                 disabled={bulkDeleting}
               >
                 Cancel
@@ -863,7 +865,7 @@ export default function PhotosPage() {
               <button
                 onClick={handleBulkDelete}
                 disabled={bulkDeleting}
-                className="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {bulkDeleting ? (
                   <>
@@ -884,8 +886,8 @@ export default function PhotosPage() {
 
       {/* Edit Photo Modal */}
       {editingPhoto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-md w-full max-h-[90svh] overflow-y-auto shadow-xl">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-serif text-stone-800">Edit Photo</h3>
               <button
@@ -916,7 +918,7 @@ export default function PhotosPage() {
                   type="text"
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+                  className="w-full min-h-11 px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
                   placeholder="Enter photo title"
                 />
               </div>
@@ -930,7 +932,7 @@ export default function PhotosPage() {
                   <select
                     value={editCategory}
                     onChange={(e) => setEditCategory(e.target.value)}
-                    className="flex-1 px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans bg-white"
+                    className="flex-1 min-h-11 px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans bg-white"
                   >
                     {allCategories.filter((c: string) => c !== 'All').map((cat: string) => (
                       <option key={cat} value={cat}>
@@ -942,10 +944,10 @@ export default function PhotosPage() {
               </div>
             </div>
 
-            <div className="flex gap-3 justify-end mt-6">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end mt-6">
               <button
                 onClick={() => setEditingPhoto(null)}
-                className="px-4 py-2 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
                 disabled={saving}
               >
                 Cancel
@@ -953,7 +955,7 @@ export default function PhotosPage() {
               <button
                 onClick={handleUpdatePhoto}
                 disabled={saving || !editTitle.trim()}
-                className="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {saving ? (
                   <>
@@ -974,27 +976,27 @@ export default function PhotosPage() {
 
       {/* Add Category Modal */}
       {showAddCategory && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/50">
+          <div className="bg-white rounded-2xl p-5 sm:p-6 max-w-sm w-full max-h-[90svh] overflow-y-auto shadow-xl">
             <h3 className="text-lg font-serif text-stone-800 mb-4">Add New Category</h3>
             <input
               type="text"
               value={newCategory}
               onChange={(e) => setNewCategory(e.target.value)}
               placeholder="Category name"
-              className="w-full px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans mb-4"
+              className="w-full min-h-11 px-4 py-2 rounded-lg border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans mb-4"
               onKeyDown={(e) => {
                 if (e.key === 'Enter') handleAddCategory()
               }}
               disabled={persistingCategories}
             />
-            <div className="flex gap-3 justify-end">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 justify-end">
               <button
                 onClick={() => {
                   setShowAddCategory(false)
                   setNewCategory('')
                 }}
-                className="px-4 py-2 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg text-stone-600 hover:bg-stone-100 font-sans transition-colors"
                 disabled={persistingCategories}
               >
                 Cancel
@@ -1008,7 +1010,7 @@ export default function PhotosPage() {
                     (category) => category.toLowerCase() === normalizeCategory(newCategory).toLowerCase()
                   )
                 }
-                className="px-4 py-2 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center gap-2"
+                className="w-full sm:w-auto px-4 py-2.5 rounded-lg bg-rose-600 text-white hover:bg-rose-700 font-sans transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
                 {persistingCategories ? 'Saving...' : 'Add'}

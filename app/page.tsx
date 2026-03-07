@@ -8,6 +8,7 @@ import Link from 'next/link';
 import ShiftingCountdown from '@/components/ui/countdown-timer';
 import GuestMusic from '@/components/GuestMusic';
 import { HERO_IMAGE_URL } from '@/lib/heroImage';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 function FloralDivider() {
   return (
@@ -91,8 +92,8 @@ function Navigation() {
             : 'bg-transparent'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="flex items-center justify-between h-20">
+        <div className="safe-container px-4 sm:px-8 lg:px-12">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-3 sm:gap-6">
             {/* Left nav items */}
             <div className="hidden md:flex items-center gap-8">
               {navItems.slice(0, 2).map((item) => (
@@ -116,9 +117,9 @@ function Navigation() {
             </div>
 
             {/* Logo */}
-            <Link href="/" className="flex-shrink-0">
+            <Link href="/" className="flex-shrink min-w-0">
               <motion.h1 
-                className={`text-2xl sm:text-3xl font-light italic tracking-normal transition-colors ${
+                className={`text-xl sm:text-3xl truncate font-light italic tracking-normal transition-colors ${
                   scrolled ? 'text-stone-800' : 'text-white'
                 }`} 
                 style={{ 
@@ -156,7 +157,7 @@ function Navigation() {
             {/* Mobile menu button */}
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className={`md:hidden p-2 transition-colors ${
+              className={`md:hidden p-2.5 rounded-full border border-transparent min-h-11 min-w-11 transition-colors ${
                 scrolled ? 'text-stone-800' : 'text-white'
               }`}
             >
@@ -174,14 +175,14 @@ function Navigation() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl pt-24 px-6 md:hidden"
+            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl pt-20 px-6 md:hidden"
           >
-            <div className="flex flex-col items-center gap-8">
+            <div className="flex flex-col items-center gap-3">
               {navItems.map((item) => (
                 <button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className={`text-sm tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
+                  className={`w-full max-w-xs py-3 text-sm tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
                     activeSection === item.id ? 'text-rose-500' : 'text-stone-600'
                   }`}
                 >
@@ -289,10 +290,11 @@ function Sparkles({ className }: { className?: string }) {
 }
 
 export default function Home() {
+  const isMobile = useIsMobile();
   const { scrollY } = useScroll();
-  const y1 = useTransform(scrollY, [0, 500], [0, 150]);
-  const opacity = useTransform(scrollY, [0, 300], [1, 0]);
-  const scale = useTransform(scrollY, [0, 500], [1, 1.1]);
+  const y1 = useTransform(scrollY, [0, 500], [0, isMobile ? 60 : 150]);
+  const opacity = useTransform(scrollY, [0, isMobile ? 200 : 300], [1, 0]);
+  const scale = useTransform(scrollY, [0, 500], [1, isMobile ? 1.04 : 1.1]);
   const countdownTargetDate = getNextNovemberFirstTarget();
 
   return (
@@ -328,13 +330,13 @@ export default function Home() {
         {/* Hero Content with Parallax Fade */}
         <motion.div 
           style={{ opacity }}
-          className="relative z-20 text-center px-6 max-w-4xl mx-auto"
+          className="relative z-20 text-center px-4 sm:px-6 max-w-4xl mx-auto"
         >
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-xs sm:text-sm uppercase tracking-[0.3em] text-white/80 font-sans font-medium mb-6"
+            className="text-[11px] sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 font-sans font-medium mb-5 sm:mb-6"
             style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
           >
             Laboni & Adnan Arif
@@ -344,7 +346,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 1, delay: 0.5 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-white leading-[1.1] tracking-tight"
+            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-white leading-[1.08] tracking-tight"
             style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}
           >
             Turning Your Wedding Dreams
@@ -355,7 +357,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.8 }}
-            className="mt-8 text-base sm:text-lg text-white/90 font-sans font-light tracking-wide max-w-xl mx-auto leading-relaxed"
+            className="mt-6 sm:mt-8 text-sm sm:text-lg text-white/90 font-sans font-light tracking-wide max-w-xl mx-auto leading-relaxed"
             style={{ textShadow: '0 2px 15px rgba(0,0,0,0.5)' }}
           >
             Crafting every detail to shape your perfect wedding day with love and elegance.
@@ -365,17 +367,17 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1.1 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+            className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto"
           >
             <Link
               href="#about"
-              className="px-10 py-4 bg-white text-stone-900 text-sm tracking-[0.15em] font-sans font-semibold rounded-full hover:bg-stone-100 hover:scale-105 transition-all duration-300 shadow-xl"
+              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white text-stone-900 text-xs sm:text-sm tracking-[0.12em] sm:tracking-[0.15em] font-sans font-semibold rounded-full hover:bg-stone-100 hover:scale-105 transition-all duration-300 shadow-xl"
             >
               EXPLORE OUR STORY
             </Link>
             <Link
               href="/gallery"
-              className="px-10 py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white text-sm tracking-[0.15em] font-sans font-medium rounded-full hover:bg-white/20 hover:scale-105 transition-all duration-300"
+              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white text-xs sm:text-sm tracking-[0.12em] sm:tracking-[0.15em] font-sans font-medium rounded-full hover:bg-white/20 hover:scale-105 transition-all duration-300"
             >
               VIEW GALLERY
             </Link>
@@ -391,38 +393,38 @@ export default function Home() {
           <section
             key={section.id || section.title}
             id={STORY_SECTION_ANCHORS[index]}
-            className={`sticky top-0 scroll-mt-24 h-screen w-full flex items-center justify-center p-4 md:p-12 ${section.color} ${section.textColor} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}
+            className={`md:sticky md:top-0 scroll-mt-24 min-h-[88svh] md:h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-12 ${section.color} ${section.textColor} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}
             style={{ 
               zIndex: index + 1,
             }}
           >
-            <div className="max-w-6xl w-full grid md:grid-cols-2 gap-8 md:gap-16 items-center">
+            <div className="max-w-6xl w-full grid md:grid-cols-2 gap-6 sm:gap-8 md:gap-16 items-center">
               <motion.div
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
                 viewport={{ once: false, margin: "-100px" }}
-                className="order-2 md:order-1"
+                className="order-2 md:order-1 mobile-motion-soft"
               >
-                <div className="flex items-center gap-4 mb-6">
+                <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
                   <div className="w-10 h-10 rounded-full bg-stone-200/50 flex items-center justify-center">
                     {section.icon}
                   </div>
-                  <span className="text-sm uppercase tracking-widest font-sans font-bold opacity-60">
+                  <span className="text-xs sm:text-sm uppercase tracking-[0.16em] sm:tracking-widest font-sans font-bold opacity-60">
                     {section.subtitle}
                   </span>
                 </div>
-                <h2 className="text-5xl md:text-7xl font-serif font-light mb-8 leading-tight">
+                <h2 className="text-4xl sm:text-5xl md:text-7xl font-serif font-light mb-5 sm:mb-8 leading-tight">
                   {section.title}
                 </h2>
-                <p className="text-lg md:text-xl font-serif leading-relaxed opacity-80 max-w-md">
+                <p className="text-base sm:text-lg md:text-xl font-serif leading-relaxed opacity-80 max-w-md">
                   {section.description}
                 </p>
                 
                 {section.type === 'countdown' ? (
                   <ShiftingCountdown targetDate={countdownTargetDate} />
                 ) : (
-                  <div className="mt-12 flex items-center gap-6">
+                  <div className="mt-8 sm:mt-12 flex flex-wrap items-center gap-4 sm:gap-6">
                     <div className="flex flex-col">
                       <span className="text-[10px] uppercase tracking-tighter font-sans opacity-40">Location</span>
                       <span className="text-sm font-sans flex items-center gap-1">
@@ -445,7 +447,7 @@ export default function Home() {
                 whileInView={{ opacity: 1, scale: 1, rotate: index % 2 === 0 ? -1 : 1 }}
                 transition={{ duration: 1 }}
                 viewport={{ once: false }}
-                className="order-1 md:order-2 relative aspect-[3/4] md:aspect-auto md:h-[70vh] rounded-2xl overflow-hidden shadow-2xl border-[12px] border-white"
+                className="order-1 md:order-2 relative aspect-[4/5] sm:aspect-[3/4] md:aspect-auto md:h-[70vh] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border-8 sm:border-[12px] border-white mobile-motion-soft"
               >
                 <Image 
                   src={section.image || ''} 
@@ -462,7 +464,7 @@ export default function Home() {
       </div>
 
       {/* Final Section */}
-      <section id="contact" className="scroll-mt-24 min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a1a] via-[#252525] to-[#1a1a1a] text-white p-8 text-center relative z-50 overflow-hidden">
+      <section id="contact" className="scroll-mt-24 min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a1a] via-[#252525] to-[#1a1a1a] text-white px-4 sm:px-8 py-12 sm:py-10 text-center relative z-50 overflow-hidden">
         {/* Decorative elements */}
         <div className="absolute top-20 left-10 w-32 h-32 bg-rose-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-10 w-40 h-40 bg-amber-500/10 rounded-full blur-3xl" />
@@ -472,17 +474,17 @@ export default function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, ease: "easeOut" }}
           viewport={{ once: true }}
-          className="max-w-3xl relative z-10"
+          className="max-w-3xl relative z-10 mobile-motion-soft"
         >
           {/* Decorative line above */}
           <motion.div 
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             transition={{ duration: 1, delay: 0.3 }}
-            className="w-24 h-px bg-gradient-to-r from-transparent via-rose-400/60 to-transparent mx-auto mb-12"
+            className="w-20 sm:w-24 h-px bg-gradient-to-r from-transparent via-rose-400/60 to-transparent mx-auto mb-9 sm:mb-12"
           />
           
-          <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-light mb-6 tracking-tight">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-light mb-4 sm:mb-6 tracking-tight">
             To be continued
             <span className="text-rose-400">...</span>
           </h2>
@@ -492,30 +494,30 @@ export default function Home() {
           </p>
           
           {/* Names */}
-          <p className="text-2xl sm:text-3xl font-light italic mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
+          <p className="text-xl sm:text-3xl font-light italic mb-9 sm:mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
             Laboni & Adnan Arif
           </p>
           
           {/* Decorative divider */}
-          <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="flex items-center justify-center gap-3 sm:gap-4 mb-9 sm:mb-12">
             <div className="w-16 h-px bg-stone-700" />
             <Heart className="w-5 h-5 text-rose-400/60" />
             <div className="w-16 h-px bg-stone-700" />
           </div>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="px-8 py-4 border border-stone-600 rounded-full font-sans text-sm uppercase tracking-[0.2em] hover:bg-white hover:text-stone-900 hover:border-white transition-all duration-500"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 border border-stone-600 rounded-full font-sans text-xs sm:text-sm uppercase tracking-[0.14em] sm:tracking-[0.2em] hover:bg-white hover:text-stone-900 hover:border-white transition-all duration-500"
             >
               Replay Story
             </motion.button>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/gallery"
-                className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-rose-500 to-rose-600 rounded-full font-sans text-sm uppercase tracking-[0.2em] hover:from-rose-400 hover:to-rose-500 transition-all duration-500 shadow-lg shadow-rose-500/25"
+                className="inline-flex w-full sm:w-auto justify-center items-center gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-rose-500 to-rose-600 rounded-full font-sans text-xs sm:text-sm uppercase tracking-[0.14em] sm:tracking-[0.2em] hover:from-rose-400 hover:to-rose-500 transition-all duration-500 shadow-lg shadow-rose-500/25"
               >
                 <Images className="w-5 h-5" />
                 View Gallery

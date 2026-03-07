@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { Upload, X, ImageIcon, Check, AlertCircle } from 'lucide-react'
+import { useState, useCallback, useEffect } from 'react'
+import { Upload, X, ImageIcon, Check, AlertCircle, ChevronDown } from 'lucide-react'
 import Image from 'next/image'
 
 interface UploadingFile {
@@ -21,6 +21,37 @@ export default function UploadPage() {
   const [files, setFiles] = useState<UploadingFile[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [openCategoryFor, setOpenCategoryFor] = useState<string | null>(null)
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement | null
+      if (target?.closest('[data-category-picker]')) return
+      setOpenCategoryFor(null)
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setOpenCategoryFor(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutsideClick)
+    document.addEventListener('keydown', handleEscape)
+
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('keydown', handleEscape)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!openCategoryFor) return
+    const fileStillExists = files.some((file) => file.id === openCategoryFor)
+    if (!fileStillExists) {
+      setOpenCategoryFor(null)
+    }
+  }, [files, openCategoryFor])
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -140,10 +171,10 @@ export default function UploadPage() {
   const errorCount = files.filter((f) => f.status === 'error').length
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-4xl mx-auto space-y-5 sm:space-y-6">
       {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-serif text-stone-800 mb-2">Upload Photos</h1>
+      <div className="text-center mb-6 sm:mb-8">
+        <h1 className="text-2xl sm:text-3xl font-serif text-stone-800 mb-2">Upload Photos</h1>
         <p className="text-stone-600 font-sans">
           Drag and drop your wedding photos or click to browse
         </p>
@@ -154,7 +185,7 @@ export default function UploadPage() {
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
-        className={`relative border-3 border-dashed rounded-3xl p-12 text-center transition-all duration-300 ${
+        className={`relative border-3 border-dashed rounded-3xl p-6 sm:p-12 text-center transition-all duration-300 ${
           isDragging
             ? 'border-rose-400 bg-rose-50 scale-[1.02]'
             : 'border-stone-300 bg-white hover:border-stone-400'
@@ -169,12 +200,12 @@ export default function UploadPage() {
         />
         <div className="space-y-4">
           <div
-            className={`w-20 h-20 mx-auto rounded-2xl flex items-center justify-center transition-colors ${
+            className={`w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-2xl flex items-center justify-center transition-colors ${
               isDragging ? 'bg-rose-100' : 'bg-stone-100'
             }`}
           >
             <Upload
-              className={`w-10 h-10 transition-colors ${
+              className={`w-8 h-8 sm:w-10 sm:h-10 transition-colors ${
                 isDragging ? 'text-rose-500' : 'text-stone-400'
               }`}
             />
@@ -192,13 +223,13 @@ export default function UploadPage() {
 
       {/* File List */}
       {files.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-visible">
           <div className="p-6 border-b border-stone-100">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <h2 className="text-lg font-serif text-stone-800">
                 {files.length} {files.length === 1 ? 'Photo' : 'Photos'} Ready
               </h2>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                 {completedCount > 0 && (
                   <span className="text-sm text-emerald-600 font-sans flex items-center gap-1">
                     <Check className="w-4 h-4" />
@@ -217,7 +248,7 @@ export default function UploadPage() {
 
           <div className="divide-y divide-stone-100">
             {files.map((file) => (
-              <div key={file.id} className="p-4 flex items-center gap-4">
+              <div key={file.id} className="p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                 {/* Preview */}
                 <div className="relative w-20 h-20 rounded-xl overflow-hidden bg-stone-100 flex-shrink-0">
                   <Image
@@ -236,24 +267,55 @@ export default function UploadPage() {
                     onChange={(e) =>
                       updateFile(file.id, { title: e.target.value })
                     }
-                    className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm font-sans focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none"
+                    className="w-full min-h-10 px-3 py-2 rounded-lg border border-stone-200 text-sm font-sans focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none"
                     placeholder="Photo title"
                     disabled={file.status === 'uploading' || file.status === 'completed'}
                   />
-                  <select
-                    value={file.category}
-                    onChange={(e) =>
-                      updateFile(file.id, { category: e.target.value })
-                    }
-                    className="w-full px-3 py-2 rounded-lg border border-stone-200 text-sm font-sans focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none"
-                    disabled={file.status === 'uploading' || file.status === 'completed'}
-                  >
-                    {CATEGORIES.map((cat) => (
-                      <option key={cat} value={cat}>
-                        {cat}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="relative" data-category-picker={file.id}>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setOpenCategoryFor((prev) => (prev === file.id ? null : file.id))
+                      }
+                      disabled={file.status === 'uploading' || file.status === 'completed'}
+                      className={`w-full min-h-10 px-3 py-2 rounded-lg border text-sm font-sans outline-none transition-all flex items-center justify-between gap-2 ${
+                        openCategoryFor === file.id
+                          ? 'border-rose-400 ring-2 ring-rose-100 bg-rose-50/40'
+                          : 'border-stone-200 bg-white hover:border-stone-300'
+                      } disabled:opacity-60 disabled:cursor-not-allowed`}
+                    >
+                      <span className="truncate text-left text-stone-800">{file.category}</span>
+                      <ChevronDown
+                        className={`w-4 h-4 text-stone-500 transition-transform ${
+                          openCategoryFor === file.id ? 'rotate-180' : ''
+                        }`}
+                      />
+                    </button>
+
+                    {openCategoryFor === file.id && (
+                      <div className="absolute top-[calc(100%+0.35rem)] left-0 right-0 z-30 rounded-xl border border-stone-200 bg-white shadow-xl overflow-hidden">
+                        <div className="max-h-52 overflow-y-auto py-1.5">
+                          {CATEGORIES.map((cat) => (
+                            <button
+                              key={cat}
+                              type="button"
+                              onClick={() => {
+                                updateFile(file.id, { category: cat })
+                                setOpenCategoryFor(null)
+                              }}
+                              className={`w-full px-3 py-2 text-left text-sm font-sans transition-colors ${
+                                file.category === cat
+                                  ? 'bg-rose-50 text-rose-700'
+                                  : 'text-stone-700 hover:bg-stone-50'
+                              }`}
+                            >
+                              {cat}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Status */}
@@ -289,7 +351,7 @@ export default function UploadPage() {
 
           {/* Actions */}
           <div className="p-6 bg-stone-50 border-t border-stone-100">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col-reverse sm:flex-row sm:items-center justify-between gap-3">
               <button
                 onClick={() => {
                   files.forEach((f) => URL.revokeObjectURL(f.preview))
@@ -303,7 +365,7 @@ export default function UploadPage() {
               <button
                 onClick={handleUpload}
                 disabled={uploading || files.every((f) => f.status === 'completed')}
-                className="px-6 py-3 bg-stone-800 text-white rounded-xl font-sans font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="w-full sm:w-auto px-6 py-3 bg-stone-800 text-white rounded-xl font-sans font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
                 {uploading ? (
                   <>

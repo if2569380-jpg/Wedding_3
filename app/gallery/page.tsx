@@ -32,6 +32,7 @@ import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabaseBrowser';
 import { useGallerySettings } from '@/app/providers';
 import WelcomeBanner from '@/components/WelcomeBanner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface GalleryImageThumb {
   id: string;
@@ -61,6 +62,7 @@ interface PhotoCardProps {
   photo: GalleryImageThumb;
   index: number;
   viewMode: 'masonry' | 'grid';
+  isMobile: boolean;
   showWatermark: boolean;
   watermarkText: string;
   favorites: string[];
@@ -71,11 +73,12 @@ interface PhotoCardProps {
   onToggleFavorite: (e: React.MouseEvent) => void;
 }
 
-function PhotoCard({ photo, index, viewMode, showWatermark, watermarkText, favorites, settings, onClick, onToggleFavorite }: PhotoCardProps) {
+function PhotoCard({ photo, index, viewMode, isMobile, showWatermark, watermarkText, favorites, settings, onClick, onToggleFavorite }: PhotoCardProps) {
   const cardRef = useRef<HTMLDivElement>(null);
   const [tiltStyle, setTiltStyle] = useState({ transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg)' });
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMobile) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -90,6 +93,7 @@ function PhotoCard({ photo, index, viewMode, showWatermark, watermarkText, favor
   };
 
   const handleMouseLeave = () => {
+    if (isMobile) return;
     setTiltStyle({ transform: 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)' });
   };
 
@@ -104,7 +108,7 @@ function PhotoCard({ photo, index, viewMode, showWatermark, watermarkText, favor
       onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={tiltStyle}
+      style={isMobile ? undefined : tiltStyle}
       className={`group relative cursor-pointer overflow-hidden rounded-xl transition-transform duration-200 ease-out ${
         viewMode === 'masonry' ? 'break-inside-avoid' : 'aspect-square'
       }`}
@@ -114,7 +118,7 @@ function PhotoCard({ photo, index, viewMode, showWatermark, watermarkText, favor
         alt={photo.alt}
         width={800}
         height={600}
-        className={`w-full object-cover transition-transform duration-500 group-hover:scale-110 ${
+        className={`w-full object-cover transition-transform duration-500 ${isMobile ? '' : 'group-hover:scale-110'} ${
           viewMode === 'grid' ? 'h-full' : 'h-auto'
         }`}
         referrerPolicy="no-referrer"
@@ -130,7 +134,9 @@ function PhotoCard({ photo, index, viewMode, showWatermark, watermarkText, favor
       )}
       
       {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300 ${
+        isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+      }`}>
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <p className="text-white font-serif text-lg">{photo.alt}</p>
           <p className="text-white/70 text-xs uppercase tracking-widest font-sans mt-1">
@@ -171,6 +177,7 @@ function PhotoSkeleton({ viewMode }: { viewMode: 'masonry' | 'grid' }) {
 
 export default function GalleryPage() {
   const { settings } = useGallerySettings();
+  const isMobile = useIsMobile();
   const [photos, setPhotos] = useState<GalleryImageThumb[]>([]);
   const [totalPhotos, setTotalPhotos] = useState(0);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
@@ -762,23 +769,23 @@ export default function GalleryPage() {
     <main className="min-h-screen bg-[#fdfcf8]">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-[#fdfcf8]/90 backdrop-blur-md border-b border-stone-200/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+        <div className="safe-container py-3 sm:py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
             <Link
               href="/"
-              className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors"
+              className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors min-h-11"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="font-sans text-sm uppercase tracking-widest">Back</span>
+              <span className="font-sans text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-widest">Back</span>
             </Link>
-            <h1 className="text-2xl md:text-3xl font-serif font-light text-stone-800">
+            <h1 className="order-first sm:order-none w-full sm:w-auto text-center sm:text-left text-xl sm:text-2xl md:text-3xl font-serif font-light text-stone-800 px-1">
               {settings.gallery_title}
             </h1>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
               {/* View Mode Toggle */}
               <button
                 onClick={() => setViewMode(viewMode === 'masonry' ? 'grid' : 'masonry')}
-                className="p-2 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors"
+                className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
                 title={viewMode === 'masonry' ? 'Switch to Grid View' : 'Switch to Masonry View'}
               >
                 {viewMode === 'masonry' ? <Grid3X3 className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
@@ -787,7 +794,7 @@ export default function GalleryPage() {
               {settings.allow_fullscreen && (
                 <button
                   onClick={toggleFullscreen}
-                  className="p-2 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors"
+                  className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
                   title="Toggle Fullscreen"
                 >
                   {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
@@ -797,7 +804,7 @@ export default function GalleryPage() {
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="p-2 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors disabled:opacity-50"
+                className="w-11 h-11 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center"
                 title="Sign Out"
               >
                 <LogOut className="w-5 h-5" />
@@ -809,7 +816,7 @@ export default function GalleryPage() {
 
       {/* Welcome Banner for Family Members */}
       {showWelcome && familyMember && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+        <div className="safe-container pt-5 sm:pt-6">
           <WelcomeBanner
             member={familyMember}
             onDismiss={() => setShowWelcome(false)}
@@ -819,25 +826,27 @@ export default function GalleryPage() {
 
       {/* Category Filter & Search */}
       {settings.show_category_filter && (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="safe-container py-5 sm:py-8">
           {/* Categories, Search and Photo Count in one row */}
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {CATEGORIES.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-sans text-sm uppercase tracking-wider transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-stone-800 text-white'
-                    : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+          <div className="mobile-stack-gap sm:block">
+            <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-1 scrollbar-hide">
+              {CATEGORIES.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`control-pill whitespace-nowrap font-sans text-xs sm:text-sm uppercase tracking-[0.08em] sm:tracking-wider transition-all duration-300 ${
+                    selectedCategory === category
+                      ? 'bg-stone-800 text-white'
+                      : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
             
             {/* Search Input with Suggestions */}
-            <div className="relative">
+            <div className="relative w-full sm:w-60 mx-auto">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 z-10" />
               <input
                 type="text"
@@ -849,12 +858,12 @@ export default function GalleryPage() {
                 }}
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="w-40 pl-9 pr-4 py-2 rounded-full border border-stone-200 bg-white text-sm focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                className="w-full pl-9 pr-4 py-2.5 rounded-full border border-stone-200 bg-white text-sm focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
               />
               
               {/* Suggestions Dropdown */}
               {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 py-2 z-50 min-w-[200px]">
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 py-2 z-50 w-full min-w-0 max-h-56 overflow-y-auto">
                   {suggestions.map((suggestion, index) => (
                     <button
                       key={index}
@@ -873,7 +882,7 @@ export default function GalleryPage() {
             </div>
             
             {settings.show_photo_count && (
-              <span className="text-stone-500 font-sans text-sm">
+              <span className="text-stone-500 font-sans text-xs sm:text-sm text-center block">
                 • {displayedCount} of {totalCount} photo{totalCount !== 1 ? 's' : ''}
               </span>
             )}
@@ -882,12 +891,12 @@ export default function GalleryPage() {
       )}
 
       {/* Photo Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="safe-container pb-14 sm:pb-16">
         {loading ? (
           <div className={
             viewMode === 'masonry'
-              ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4'
-              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+              ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 space-y-3 sm:space-y-4'
+              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4'
           }>
             {Array.from({ length: 12 }).map((_, i) => (
               <PhotoSkeleton key={i} viewMode={viewMode} />
@@ -913,8 +922,8 @@ export default function GalleryPage() {
               layout
               className={
                 viewMode === 'masonry'
-                  ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4'
-                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
+                  ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 space-y-3 sm:space-y-4'
+                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4'
               }
             >
               <AnimatePresence mode="popLayout">
@@ -924,6 +933,7 @@ export default function GalleryPage() {
                     photo={photo}
                     index={index}
                     viewMode={viewMode}
+                    isMobile={isMobile}
                     showWatermark={showWatermark}
                     watermarkText={watermarkText}
                     favorites={favorites}
@@ -962,8 +972,8 @@ export default function GalleryPage() {
             onClick={closeLightbox}
           >
             {/* Top Toolbar */}
-            <div className="absolute top-0 left-0 right-0 p-4 flex items-center justify-between z-50 bg-gradient-to-b from-black/50 to-transparent">
-              <div className="flex items-center gap-2">
+            <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 flex flex-col gap-2 sm:gap-3 z-50 bg-gradient-to-b from-black/60 via-black/20 to-transparent">
+              <div className="flex items-center justify-between gap-2">
                 <span className="text-white font-sans text-sm">
                   {selectedPhoto + 1} / {filteredPhotos.length}
                 </span>
@@ -973,7 +983,7 @@ export default function GalleryPage() {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
                 {/* Zoom Controls */}
                 {settings.allow_zoom && (
                   <>
@@ -1031,7 +1041,7 @@ export default function GalleryPage() {
                           onClick={(e) => { e.stopPropagation(); setShareMenuOpen(false); }}
                           aria-hidden
                         />
-                        <div className="absolute right-0 top-12 z-50 w-[260px] rounded-2xl bg-stone-800/95 backdrop-blur-md border border-white/10 shadow-xl p-3">
+                        <div className="absolute right-0 top-12 z-50 w-[260px] max-w-[calc(100vw-2rem)] rounded-2xl bg-stone-800/95 backdrop-blur-md border border-white/10 shadow-xl p-3">
                           <div className="mb-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
                             <p className="text-[11px] uppercase tracking-widest text-white/50 font-sans">Share photo</p>
                             <p className="mt-1 text-sm text-white truncate">{selectedPhotoData?.alt ?? 'Wedding photo'}</p>
@@ -1132,18 +1142,18 @@ export default function GalleryPage() {
                 e.stopPropagation();
                 goToPrevious();
               }}
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
             >
-              <ChevronLeft className="w-6 h-6 text-white" />
+              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 goToNext();
               }}
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
             >
-              <ChevronRight className="w-6 h-6 text-white" />
+              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </button>
 
             {/* Image Container with Zoom & Pan + Touch Gestures */}
@@ -1153,7 +1163,7 @@ export default function GalleryPage() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className="relative max-w-[90vw] max-h-[85vh] overflow-hidden touch-none"
+              className="relative max-w-[94vw] sm:max-w-[90vw] max-h-[78vh] sm:max-h-[85vh] overflow-hidden touch-none mt-16 sm:mt-14 mb-28 sm:mb-24"
               onClick={(e) => e.stopPropagation()}
               ref={imageContainerRef}
               onTouchStart={handleTouchStart}
@@ -1161,7 +1171,7 @@ export default function GalleryPage() {
               onTouchEnd={handleTouchEnd}
             >
               <div
-                className={`relative cursor-move ${isSlideshow ? 'animate-ken-burns' : ''}`}
+                className={`relative ${isMobile ? '' : 'cursor-move'} ${isSlideshow ? 'animate-ken-burns' : ''}`}
                 style={{
                   transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
                   transition: isDragging ? 'none' : 'transform 0.3s ease-out',
@@ -1176,7 +1186,7 @@ export default function GalleryPage() {
                   alt={filteredPhotos[selectedPhoto].alt}
                   width={1200}
                   height={1600}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg select-none"
+                  className="max-w-full max-h-[58vh] sm:max-h-[70vh] object-contain rounded-lg select-none"
                   referrerPolicy="no-referrer"
                   draggable={false}
                   sizes="(max-width: 768px) 95vw, 80vw"
@@ -1194,10 +1204,10 @@ export default function GalleryPage() {
               {settings.allow_favorites && (
                 <button
                   onClick={() => toggleFavorite(filteredPhotos[selectedPhoto].id)}
-                  className="absolute top-4 right-4 w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
+                  className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
                 >
                   <Heart
-                    className={`w-6 h-6 transition-colors ${
+                    className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
                       favorites.includes(filteredPhotos[selectedPhoto].id)
                         ? 'text-rose-400 fill-rose-400'
                         : 'text-white'
@@ -1208,9 +1218,9 @@ export default function GalleryPage() {
             </motion.div>
 
             {/* Image Info - Outside image container, above thumbnails */}
-            <div className="absolute bottom-24 left-4 right-4 md:left-8 md:right-auto md:max-w-md">
-              <div className="bg-black/60 backdrop-blur-md rounded-xl px-5 py-3 border border-white/10">
-                <h3 className="text-white font-serif text-lg md:text-xl">
+            <div className="absolute bottom-20 left-3 right-3 sm:bottom-24 sm:left-4 sm:right-4 md:left-8 md:right-auto md:max-w-md">
+              <div className="bg-black/60 backdrop-blur-md rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 border border-white/10">
+                <h3 className="text-white font-serif text-base sm:text-lg md:text-xl">
                   {filteredPhotos[selectedPhoto].alt}
                 </h3>
                 <p className="text-white/60 text-xs uppercase tracking-widest font-sans mt-1">
@@ -1220,7 +1230,7 @@ export default function GalleryPage() {
             </div>
 
             {/* Thumbnail Strip - Better positioned */}
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[85vw] overflow-x-auto px-4 py-2 scrollbar-hide bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10">
+            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[94vw] sm:max-w-[85vw] overflow-x-auto px-3 sm:px-4 py-2 scrollbar-hide bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10">
               {filteredPhotos.map((photo, index) => (
                 <button
                   key={photo.id}
@@ -1231,7 +1241,7 @@ export default function GalleryPage() {
                     setPanPosition({ x: 0, y: 0 });
                     void ensureFullImageUrl(photo);
                   }}
-                  className={`flex-shrink-0 w-14 h-14 md:w-16 md:h-16 rounded-xl overflow-hidden transition-all border-2 ${
+                  className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl overflow-hidden transition-all border-2 ${
                     selectedPhoto === index
                       ? 'border-white ring-2 ring-white/30'
                       : 'border-transparent opacity-60 hover:opacity-90'
@@ -1250,7 +1260,7 @@ export default function GalleryPage() {
               ))}
             </div>
             {/* Tips Button - Shows keyboard shortcuts on hover/click */}
-            {settings.enable_keyboard_shortcuts && (
+            {settings.enable_keyboard_shortcuts && !isMobile && (
               <div className="absolute top-20 right-4 z-50">
                 <div className="group relative">
                   <button

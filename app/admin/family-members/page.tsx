@@ -151,7 +151,7 @@ export default function FamilyMembersPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -167,7 +167,7 @@ export default function FamilyMembersPage() {
             resetForm()
             setIsAdding(true)
           }}
-          className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
+          className="flex items-center justify-center gap-2 px-4 py-2.5 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors min-h-11"
         >
           <Plus className="w-4 h-4" />
           Add Member
@@ -182,7 +182,7 @@ export default function FamilyMembersPage() {
           placeholder="Search by name, email, or relationship..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+          className="w-full min-h-11 pl-10 pr-4 py-2.5 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
         />
       </div>
 
@@ -195,7 +195,7 @@ export default function FamilyMembersPage() {
             exit={{ opacity: 0, height: 0 }}
             className="bg-white rounded-xl border border-stone-200 overflow-hidden"
           >
-            <div className="p-6">
+            <div className="p-4 sm:p-6">
               <div className="flex items-center gap-2 mb-6">
                 <Sparkles className="w-5 h-5 text-rose-400" />
                 <h2 className="text-lg font-semibold text-stone-800">
@@ -203,7 +203,7 @@ export default function FamilyMembersPage() {
                 </h2>
               </div>
 
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <label className="block text-sm font-medium text-stone-700 mb-1.5">
                     <Mail className="w-4 h-4 inline mr-1" />
@@ -214,7 +214,7 @@ export default function FamilyMembersPage() {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                    className="w-full min-h-11 px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                     placeholder="family@example.com"
                   />
                 </div>
@@ -229,7 +229,7 @@ export default function FamilyMembersPage() {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                    className="w-full min-h-11 px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                     placeholder="Uncle Ahmed"
                   />
                 </div>
@@ -242,7 +242,7 @@ export default function FamilyMembersPage() {
                     type="text"
                     value={formData.relationship}
                     onChange={(e) => setFormData({ ...formData, relationship: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                    className="w-full min-h-11 px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                     placeholder="Bride's Uncle, Groom's Sister, etc."
                   />
                 </div>
@@ -255,7 +255,7 @@ export default function FamilyMembersPage() {
                     type="url"
                     value={formData.avatar_url}
                     onChange={(e) => setFormData({ ...formData, avatar_url: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
+                    className="w-full min-h-11 px-3 py-2 rounded-lg border border-stone-200 focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
                     placeholder="https://..."
                   />
                 </div>
@@ -287,11 +287,11 @@ export default function FamilyMembersPage() {
                   </label>
                 </div>
 
-                <div className="md:col-span-2 flex gap-3 pt-2">
+                <div className="md:col-span-2 flex flex-col sm:flex-row gap-3 pt-2">
                   <button
                     type="submit"
                     disabled={saving}
-                    className="flex items-center gap-2 px-4 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50"
+                    className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 px-4 py-2.5 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors disabled:opacity-50"
                   >
                     {saving ? (
                       <Loader2 className="w-4 h-4 animate-spin" />
@@ -307,7 +307,7 @@ export default function FamilyMembersPage() {
                       setEditingId(null)
                       resetForm()
                     }}
-                    className="flex items-center gap-2 px-4 py-2 border border-stone-300 text-stone-700 rounded-lg hover:bg-stone-50 transition-colors"
+                    className="w-full sm:w-auto min-h-11 flex items-center justify-center gap-2 px-4 py-2.5 border border-stone-300 text-stone-700 rounded-lg hover:bg-stone-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
                     Cancel
@@ -338,9 +338,9 @@ export default function FamilyMembersPage() {
                 key={member.id}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="p-6 hover:bg-stone-50 transition-colors"
+                className="p-4 sm:p-6 hover:bg-stone-50 transition-colors"
               >
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   {/* Avatar */}
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-rose-100 to-rose-200 flex items-center justify-center flex-shrink-0">
                     {member.avatar_url ? (
@@ -378,7 +378,7 @@ export default function FamilyMembersPage() {
                   </div>
 
                   {/* Actions */}
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 self-start">
                     <button
                       onClick={() => handleEdit(member)}
                       className="p-2 text-stone-400 hover:text-stone-600 hover:bg-stone-100 rounded-lg transition-colors"

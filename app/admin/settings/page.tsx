@@ -122,14 +122,14 @@ export default function AdminSettings() {
     onChange: () => void
     icon: any
   }) => (
-    <label className="flex items-center justify-between p-4 rounded-xl bg-stone-50 cursor-pointer hover:bg-stone-100 transition-colors">
-      <div className="flex items-center gap-3">
+    <label className="flex items-center justify-between gap-3 p-3 sm:p-4 rounded-xl bg-stone-50 cursor-pointer hover:bg-stone-100 transition-colors">
+      <div className="flex items-center gap-3 min-w-0">
         <div className="w-10 h-10 rounded-lg bg-white flex items-center justify-center shadow-sm">
           <Icon className="w-5 h-5 text-stone-600" />
         </div>
-        <div>
-          <p className="font-medium text-stone-800 font-sans">{label}</p>
-          <p className="text-sm text-stone-500 font-sans">{description}</p>
+        <div className="min-w-0">
+          <p className="font-medium text-stone-800 font-sans text-sm sm:text-base">{label}</p>
+          <p className="text-xs sm:text-sm text-stone-500 font-sans">{description}</p>
         </div>
       </div>
       <div
@@ -156,10 +156,10 @@ export default function AdminSettings() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-serif text-stone-800 mb-2">Gallery Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-serif text-stone-800 mb-2">Gallery Settings</h1>
         <p className="text-stone-600 font-sans">
           Customize your gallery experience and features
         </p>
@@ -173,13 +173,13 @@ export default function AdminSettings() {
 
       {/* General Settings */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-        <div className="p-6 border-b border-stone-100">
+        <div className="p-5 sm:p-6 border-b border-stone-100">
           <h2 className="text-xl font-serif text-stone-800 flex items-center gap-2">
             <Type className="w-5 h-5 text-rose-400" />
             General
           </h2>
         </div>
-        <div className="p-6 space-y-6">
+        <div className="p-5 sm:p-6 space-y-5 sm:space-y-6">
           <div>
             <label className="block text-sm font-medium text-stone-700 font-sans mb-2">
               Gallery Title
@@ -188,7 +188,7 @@ export default function AdminSettings() {
               type="text"
               value={settings.gallery_title}
               onChange={(e) => setSettings({ ...settings, gallery_title: e.target.value })}
-              className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+              className="w-full min-h-11 px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
             />
           </div>
 
@@ -200,7 +200,7 @@ export default function AdminSettings() {
               <select
                 value={settings.default_view_mode}
                 onChange={(e) => setSettings({ ...settings, default_view_mode: e.target.value as 'masonry' | 'grid' })}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans bg-white"
+                className="w-full min-h-11 px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans bg-white"
               >
                 <option value="masonry">Masonry (Pinterest-style)</option>
                 <option value="grid">Grid (Uniform)</option>
@@ -216,7 +216,7 @@ export default function AdminSettings() {
                 max={100}
                 value={settings.items_per_page}
                 onChange={(e) => setSettings({ ...settings, items_per_page: parseInt(e.target.value) })}
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+                className="w-full min-h-11 px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
               />
             </div>
           </div>
@@ -225,13 +225,13 @@ export default function AdminSettings() {
 
       {/* Features */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-        <div className="p-6 border-b border-stone-100">
+        <div className="p-5 sm:p-6 border-b border-stone-100">
           <h2 className="text-xl font-serif text-stone-800 flex items-center gap-2">
             <Zap className="w-5 h-5 text-amber-400" />
             Features
           </h2>
         </div>
-        <div className="p-6 space-y-3">
+        <div className="p-5 sm:p-6 space-y-3">
           <Toggle
             label="Allow Downloads"
             description="Guests can download photos"
@@ -280,13 +280,13 @@ export default function AdminSettings() {
       {/* Slideshow Settings */}
       {settings.allow_slideshow && (
         <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-          <div className="p-6 border-b border-stone-100">
+          <div className="p-5 sm:p-6 border-b border-stone-100">
             <h2 className="text-xl font-serif text-stone-800 flex items-center gap-2">
               <Clock className="w-5 h-5 text-blue-400" />
               Slideshow Settings
             </h2>
           </div>
-          <div className="p-6">
+          <div className="p-5 sm:p-6">
             <label className="block text-sm font-medium text-stone-700 font-sans mb-2">
               Slideshow Interval (seconds)
             </label>
@@ -309,13 +309,13 @@ export default function AdminSettings() {
 
       {/* Display Options */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-        <div className="p-6 border-b border-stone-100">
+        <div className="p-5 sm:p-6 border-b border-stone-100">
           <h2 className="text-xl font-serif text-stone-800 flex items-center gap-2">
             <Eye className="w-5 h-5 text-emerald-400" />
             Display Options
           </h2>
         </div>
-        <div className="p-6 space-y-3">
+        <div className="p-5 sm:p-6 space-y-3">
           <Toggle
             label="Show Category Filter"
             description="Display category filter buttons"
@@ -342,13 +342,13 @@ export default function AdminSettings() {
 
       {/* Watermark */}
       <div className="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
-        <div className="p-6 border-b border-stone-100">
+        <div className="p-5 sm:p-6 border-b border-stone-100">
           <h2 className="text-xl font-serif text-stone-800 flex items-center gap-2">
             <Shield className="w-5 h-5 text-purple-400" />
             Watermark
           </h2>
         </div>
-        <div className="p-6 space-y-4">
+        <div className="p-5 sm:p-6 space-y-4">
           <Toggle
             label="Enable Watermark"
             description="Add watermark to photos"
@@ -366,7 +366,7 @@ export default function AdminSettings() {
                 value={settings.watermark_text}
                 onChange={(e) => setSettings({ ...settings, watermark_text: e.target.value })}
                 placeholder="Your Names or Wedding Date"
-                className="w-full px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
+                className="w-full min-h-11 px-4 py-3 rounded-xl border border-stone-200 focus:border-rose-400 focus:ring-2 focus:ring-rose-100 outline-none font-sans"
               />
             </div>
           )}
@@ -374,7 +374,7 @@ export default function AdminSettings() {
       </div>
 
       {/* Info Card */}
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 sm:p-6">
         <h3 className="text-lg font-serif text-blue-800 mb-2 flex items-center gap-2">
           <Users className="w-5 h-5" />
           User Management
@@ -387,7 +387,7 @@ export default function AdminSettings() {
           href="https://app.supabase.io"
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-sans hover:bg-blue-700 transition-colors"
+          className="inline-flex min-h-11 items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-sans hover:bg-blue-700 transition-colors"
         >
           Open Supabase Dashboard
           <Mail className="w-4 h-4" />
@@ -395,11 +395,11 @@ export default function AdminSettings() {
       </div>
 
       {/* Save Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-stretch sm:justify-end">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="px-8 py-4 bg-stone-800 text-white rounded-xl font-sans font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 flex items-center gap-2 shadow-lg shadow-stone-200"
+          className="w-full sm:w-auto min-h-11 px-6 sm:px-8 py-3.5 sm:py-4 bg-stone-800 text-white rounded-xl font-sans font-medium hover:bg-stone-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg shadow-stone-200"
         >
           {saving ? (
             <>
