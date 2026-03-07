@@ -1,4 +1,8 @@
 import type {NextConfig} from 'next';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -31,8 +35,8 @@ const nextConfig: NextConfig = {
   // Keep default `.next` output so Vercel can find Next build artifacts.
   transpilePackages: ['motion'],
   turbopack: {
-    // Pin workspace root so Turbopack does not infer from parent lockfiles.
-    root: process.cwd(),
+    // Pin workspace root to this config's directory.
+    root: configDir,
   },
 };
 
