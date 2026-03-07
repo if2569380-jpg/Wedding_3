@@ -33,6 +33,7 @@ import { createClient } from '@/lib/supabaseBrowser';
 import { useGallerySettings } from '@/app/providers';
 import WelcomeBanner from '@/components/WelcomeBanner';
 import { useIsMobile } from '@/hooks/use-mobile';
+import type { AnalyticsEventType } from '@/lib/analytics';
 
 interface GalleryImageThumb {
   id: string;
@@ -205,6 +206,7 @@ export default function GalleryPage() {
   const slideshowRef = useRef<NodeJS.Timeout | null>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
   const deepLinkHandledRef = useRef(false);
+  const lastTrackedViewPhotoIdRef = useRef<string | null>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const lastTapTime = useRef<number>(0);
@@ -281,6 +283,22 @@ export default function GalleryPage() {
   const watermarkText = String(settings.watermark_text || settings.gallery_title).trim();
   const showWatermark = settings.watermark_enabled && watermarkText.length > 0;
   const selectedPhotoData = selectedPhoto !== null ? filteredPhotos[selectedPhoto] ?? null : null;
+
+  const trackAnalyticsEvent = useCallback(
+    (eventType: AnalyticsEventType, photoId?: string) => {
+      void fetch('/api/analytics/event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventType,
+          photoId: photoId ?? null,
+        }),
+      }).catch(() => {
+        // Best effort tracking; silently ignore failures.
+      });
+    },
+    []
+  );
 
   const loadPhotos = useCallback(async (cursor: string | null, mode: 'replace' | 'append') => {
     try {
@@ -402,6 +420,20 @@ export default function GalleryPage() {
 
     void ensureFullImageUrl(photo);
   }, [ensureFullImageUrl, filteredPhotos, selectedPhoto]);
+
+  useEffect(() => {
+    if (!selectedPhotoData) {
+      lastTrackedViewPhotoIdRef.current = null;
+      return;
+    }
+
+    if (lastTrackedViewPhotoIdRef.current === selectedPhotoData.id) {
+      return;
+    }
+
+    lastTrackedViewPhotoIdRef.current = selectedPhotoData.id;
+    trackAnalyticsEvent('view', selectedPhotoData.id);
+  }, [selectedPhotoData, trackAnalyticsEvent]);
 
   // Keep URL in sync with currently selected image for easy sharing.
   useEffect(() => {
@@ -584,11 +616,13 @@ export default function GalleryPage() {
       a.download = `wedding-${photo.alt.replace(/\s+/g, '-').toLowerCase()}-${photo.id}.jpg`;
       a.click();
       URL.revokeObjectURL(url);
+      trackAnalyticsEvent('download', photo.id);
     } catch {
       // Fallback: open in new tab for user to save
       window.open(fullImageUrl, '_blank');
+      trackAnalyticsEvent('download', photo.id);
     }
-  }, [ensureFullImageUrl, selectedPhoto, filteredPhotos]);
+  }, [ensureFullImageUrl, selectedPhoto, filteredPhotos, trackAnalyticsEvent]);
 
   // Share
   const shareUrl = typeof window !== 'undefined'
@@ -611,10 +645,13 @@ export default function GalleryPage() {
       setLinkCopied(true);
       setShareMenuOpen(false);
       setTimeout(() => setLinkCopied(false), 2000);
+      if (selectedPhotoData) {
+        trackAnalyticsEvent('share', selectedPhotoData.id);
+      }
     } catch {
       setLinkCopied(false);
     }
-  }, [shareUrl]);
+  }, [shareUrl, selectedPhotoData, trackAnalyticsEvent]);
 
   const handleNativeShare = useCallback(async () => {
     if (!selectedPhotoData) return;
@@ -630,25 +667,32 @@ export default function GalleryPage() {
         text: shareText,
         url: shareUrl,
       });
+      trackAnalyticsEvent('share', selectedPhotoData.id);
       setShareMenuOpen(false);
     } catch (error) {
       if ((error as Error).name !== 'AbortError') {
         await handleCopyLink();
       }
     }
-  }, [canNativeShare, handleCopyLink, selectedPhotoData, shareText, shareUrl]);
+  }, [canNativeShare, handleCopyLink, selectedPhotoData, shareText, shareUrl, trackAnalyticsEvent]);
 
   const handleShareWhatsApp = useCallback(() => {
+    if (selectedPhotoData) {
+      trackAnalyticsEvent('share', selectedPhotoData.id);
+    }
     const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
     setShareMenuOpen(false);
-  }, [shareUrl, shareText]);
+  }, [shareUrl, shareText, selectedPhotoData, trackAnalyticsEvent]);
 
   const handleShareFacebook = useCallback(() => {
+    if (selectedPhotoData) {
+      trackAnalyticsEvent('share', selectedPhotoData.id);
+    }
     const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
     setShareMenuOpen(false);
-  }, [shareUrl]);
+  }, [shareUrl, selectedPhotoData, trackAnalyticsEvent]);
 
   const openShareTarget = useCallback((url: string) => {
     window.open(url, '_blank', 'noopener,noreferrer');
@@ -656,17 +700,26 @@ export default function GalleryPage() {
   }, []);
 
   const handleShareTelegram = useCallback(() => {
+    if (selectedPhotoData) {
+      trackAnalyticsEvent('share', selectedPhotoData.id);
+    }
     openShareTarget(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
-  }, [openShareTarget, shareText, shareUrl]);
+  }, [openShareTarget, selectedPhotoData, shareText, shareUrl, trackAnalyticsEvent]);
 
   const handleShareX = useCallback(() => {
+    if (selectedPhotoData) {
+      trackAnalyticsEvent('share', selectedPhotoData.id);
+    }
     openShareTarget(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`);
-  }, [openShareTarget, shareText, shareUrl]);
+  }, [openShareTarget, selectedPhotoData, shareText, shareUrl, trackAnalyticsEvent]);
 
   const handleShareEmail = useCallback(() => {
+    if (selectedPhotoData) {
+      trackAnalyticsEvent('share', selectedPhotoData.id);
+    }
     window.location.href = `mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
     setShareMenuOpen(false);
-  }, [shareText, shareUrl]);
+  }, [selectedPhotoData, shareText, shareUrl, trackAnalyticsEvent]);
 
   // Pan functionality
   const handleMouseDown = useCallback((e: React.MouseEvent) => {

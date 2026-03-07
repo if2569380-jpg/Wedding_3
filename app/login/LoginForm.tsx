@@ -20,6 +20,25 @@ export default function LoginForm() {
   const [inviteSaving, setInviteSaving] = useState(false)
   const [inviteError, setInviteError] = useState<string | null>(null)
 
+  const recordLoginEvent = async () => {
+    const payload = JSON.stringify({ eventType: 'login' })
+
+    if (typeof navigator !== 'undefined' && typeof navigator.sendBeacon === 'function') {
+      const body = new Blob([payload], { type: 'application/json' })
+      const queued = navigator.sendBeacon('/api/analytics/event', body)
+      if (queued) {
+        return
+      }
+    }
+
+    await fetch('/api/analytics/event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: payload,
+      keepalive: true,
+    })
+  }
+
   useEffect(() => {
     // Get redirect URL from query params on client side only
     if (typeof window !== 'undefined') {
@@ -146,6 +165,11 @@ export default function LoginForm() {
 
       setShowSetPasswordDialog(false)
       setMessage('Password set successfully! Redirecting...')
+      try {
+        await recordLoginEvent()
+      } catch {
+        // Login tracking is best effort only.
+      }
       window.location.href = redirectUrl
     } catch {
       setInviteError('Could not set password. Please try again.')
@@ -174,6 +198,11 @@ export default function LoginForm() {
 
       if (data.session) {
         setMessage('Login successful! Redirecting...')
+        try {
+          await recordLoginEvent()
+        } catch {
+          // Login tracking is best effort only.
+        }
         // Use window.location for redirect instead of router
         window.location.href = redirectUrl
       }
