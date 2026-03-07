@@ -825,7 +825,7 @@ export default function GalleryPage() {
         <div className="safe-container px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           {/* Mobile Header */}
           <div className="sm:hidden space-y-3">
-            <h1 className="w-full text-center text-xl font-serif font-light text-stone-800 px-1 leading-tight">
+            <h1 className="w-full text-center text-xl font-serif font-medium text-stone-900 px-1 leading-tight">
               {settings.gallery_title}
             </h1>
             <div className="flex items-center justify-between gap-3">
@@ -834,12 +834,12 @@ export default function GalleryPage() {
                 className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors min-h-11"
               >
                 <ArrowLeft className="w-5 h-5" />
-                <span className="font-sans text-xs uppercase tracking-[0.2em]">Back</span>
+                <span className="font-sans text-xs uppercase tracking-[0.12em]">Back</span>
               </Link>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => setViewMode(viewMode === 'masonry' ? 'grid' : 'masonry')}
-                  className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
+                  className="w-11 h-11 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
                   title={viewMode === 'masonry' ? 'Switch to Grid View' : 'Switch to Masonry View'}
                 >
                   {viewMode === 'masonry' ? <Grid3X3 className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
@@ -847,7 +847,7 @@ export default function GalleryPage() {
                 {settings.allow_fullscreen && (
                   <button
                     onClick={toggleFullscreen}
-                    className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
+                    className="w-11 h-11 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
                     title="Toggle Fullscreen"
                   >
                     {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
@@ -856,7 +856,7 @@ export default function GalleryPage() {
                 <button
                   onClick={handleLogout}
                   disabled={loggingOut}
-                  className="w-11 h-11 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center"
+                  className="w-11 h-11 rounded-xl bg-rose-100 text-rose-700 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center border border-rose-200/90 shadow-sm"
                   title="Sign Out"
                 >
                   <LogOut className="w-5 h-5" />
@@ -872,15 +872,15 @@ export default function GalleryPage() {
               className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors min-h-11"
             >
               <ArrowLeft className="w-5 h-5" />
-              <span className="font-sans text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-widest">Back</span>
+              <span className="font-sans text-xs sm:text-sm uppercase tracking-[0.12em] sm:tracking-[0.16em]">Back</span>
             </Link>
-            <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-serif font-light text-stone-800 px-1 truncate">
+            <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-serif font-medium text-stone-900 px-1 truncate">
               {settings.gallery_title}
             </h1>
             <div className="flex items-center gap-2 justify-end">
               <button
                 onClick={() => setViewMode(viewMode === 'masonry' ? 'grid' : 'masonry')}
-                className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
+                className="w-11 h-11 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
                 title={viewMode === 'masonry' ? 'Switch to Grid View' : 'Switch to Masonry View'}
               >
                 {viewMode === 'masonry' ? <Grid3X3 className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
@@ -888,7 +888,7 @@ export default function GalleryPage() {
               {settings.allow_fullscreen && (
                 <button
                   onClick={toggleFullscreen}
-                  className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
+                  className="w-11 h-11 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
                   title="Toggle Fullscreen"
                 >
                   {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
@@ -897,7 +897,7 @@ export default function GalleryPage() {
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
-                className="w-11 h-11 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center"
+                className="w-11 h-11 rounded-xl bg-rose-100 text-rose-700 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center border border-rose-200/90 shadow-sm"
                 title="Sign Out"
               >
                 <LogOut className="w-5 h-5" />

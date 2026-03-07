@@ -1,10 +1,10 @@
 import type {Metadata} from 'next';
-import { Inter, Cormorant_Garamond } from 'next/font/google';
+import { Manrope, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
-const inter = Inter({
+const manrope = Manrope({
   subsets: ['latin'],
   variable: '--font-sans',
 });
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${inter.variable} ${cormorant.variable}`}>
+    <html lang="en" className={`${manrope.variable} ${cormorant.variable}`}>
       <body suppressHydrationWarning className="font-serif">
         {children}
         <Analytics />

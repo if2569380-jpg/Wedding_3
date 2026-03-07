@@ -10,6 +10,14 @@ import GuestMusic from '@/components/GuestMusic';
 import { HERO_IMAGE_URL } from '@/lib/heroImage';
 import { useIsMobile } from '@/hooks/use-mobile';
 
+const SUPABASE_PUBLIC_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const GALLERY_BUCKET = process.env.NEXT_PUBLIC_SUPABASE_GALLERY_BUCKET || 'gallery';
+
+function getPublicStorageUrl(path: string) {
+  if (!SUPABASE_PUBLIC_URL || !path) return '';
+  return `${SUPABASE_PUBLIC_URL}/storage/v1/object/public/${GALLERY_BUCKET}/${path}`;
+}
+
 function FloralDivider() {
   return (
     <div className="absolute bottom-0 left-0 right-0 z-30">
@@ -210,7 +218,7 @@ const WEDDING_SECTIONS = [
     description: "It all started with a simple hello. From that moment, we knew our lives would never be the same. Every conversation felt like coming home.",
     color: "bg-[#fdfcf8]",
     textColor: "text-stone-800",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/e2f0393f-98af-4204-bbfb-c35466695a02-1772830664406.jfif",
+    imagePath: "full/e2f0393f-98af-4204-bbfb-c35466695a02-1772830664406.jfif",
     icon: <Heart className="w-6 h-6 text-rose-400" />,
   },
   {
@@ -220,7 +228,7 @@ const WEDDING_SECTIONS = [
     description: "Under the starlit sky, with the sound of waves crashing against the shore, he asked the question that would change our forever. She said yes.",
     color: "bg-[#f5f2ed]",
     textColor: "text-stone-800",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/cfc8fac2-ad0a-4e8d-a9d1-7d934c682fb1-1772828895513.jfif",
+    imagePath: "full/cfc8fac2-ad0a-4e8d-a9d1-7d934c682fb1-1772828895513.jfif",
     icon: <Sparkles className="w-6 h-6 text-amber-400" />,
   },
   {
@@ -230,7 +238,7 @@ const WEDDING_SECTIONS = [
     description: "Surrounded by our dearest family and friends, we promised to love and cherish each other for all the days of our lives. A day filled with joy and laughter.",
     color: "bg-[#ece8e1]",
     textColor: "text-stone-800",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/82ebe6d4-d97a-44c1-b1cd-b6713c33b9d0-1772830623681.jfif",
+    imagePath: "full/82ebe6d4-d97a-44c1-b1cd-b6713c33b9d0-1772830623681.jfif",
     icon: <Calendar className="w-6 h-6 text-stone-500" />,
   },
   {
@@ -240,7 +248,7 @@ const WEDDING_SECTIONS = [
     description: "The music played, the wine flowed, and we danced our first dance as husband and wife. A celebration of a love that will last an eternity.",
     color: "bg-[#5a5a40]",
     textColor: "text-stone-100",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/1da8e16b-3082-4c77-967d-82a0ee36e8b2-1772828877550.jfif",
+    imagePath: "full/1da8e16b-3082-4c77-967d-82a0ee36e8b2-1772828877550.jfif",
     icon: <Music className="w-6 h-6 text-stone-200" />,
   },
   {
@@ -251,7 +259,7 @@ const WEDDING_SECTIONS = [
     description: "Counting down to the next November 1 celebration of our marriage and memories together.",
     color: "bg-[#4a4a30]",
     textColor: "text-stone-100",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/59181363-2d7c-427f-959c-509a4dd4d0d1-1772828921774.jfif",
+    imagePath: "full/59181363-2d7c-427f-959c-509a4dd4d0d1-1772828921774.jfif",
     icon: <Timer className="w-6 h-6 text-rose-300" />,
   }
 ];
@@ -301,6 +309,31 @@ export default function Home() {
   const opacity = useTransform(scrollY, [0, isMobile ? 200 : 300], [1, 0]);
   const scale = useTransform(scrollY, [0, 500], [1, isMobile ? 1.04 : 1.1]);
   const countdownTargetDate = getNextNovemberFirstTarget();
+  const [landingSignedImages, setLandingSignedImages] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadLandingImages = async () => {
+      try {
+        const response = await fetch('/api/landing-images');
+        if (!response.ok) return;
+
+        const payload = await response.json() as { images?: Record<string, string> };
+        if (!isMounted || !payload?.images) return;
+
+        setLandingSignedImages(payload.images);
+      } catch {
+        // Keep public URL fallback when signing endpoint is unavailable.
+      }
+    };
+
+    loadLandingImages();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <main className="relative antialiased selection:bg-rose-100 selection:text-rose-900">
@@ -455,7 +488,12 @@ export default function Home() {
                 className="order-1 md:order-2 relative aspect-[4/5] sm:aspect-[3/4] md:aspect-auto md:h-[70vh] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border-8 sm:border-[12px] border-white mobile-motion-soft"
               >
                 <Image 
-                  src={section.image || ''} 
+                  src={
+                    landingSignedImages[section.imagePath]
+                    || getPublicStorageUrl(section.imagePath)
+                    || getPublicStorageUrl(section.imagePath.replace(/^full\//, 'thumbnails/'))
+                    || HERO_IMAGE_URL
+                  }
                   alt={section.title} 
                   fill 
                   className="object-cover"

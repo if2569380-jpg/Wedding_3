@@ -217,7 +217,7 @@ export default function LoginForm() {
     <>
       {/* Header */}
       <div className="mb-5 sm:mb-6">
-        <h1 className="text-xl sm:text-2xl font-serif font-light text-stone-800 mb-1">
+        <h1 className="text-xl sm:text-2xl font-serif font-medium text-stone-900 mb-1">
           Welcome Back
         </h1>
         <p className="text-stone-600 font-sans text-sm">
@@ -226,7 +226,7 @@ export default function LoginForm() {
       </div>
 
       {/* Login Form */}
-      <div className="bg-white rounded-2xl shadow-lg shadow-stone-200/50 border border-stone-100 p-5 sm:p-6">
+      <div className="bg-white/95 rounded-2xl shadow-xl shadow-stone-300/45 border border-stone-200 p-5 sm:p-6 backdrop-blur-sm">
         {error && (
           <div className="mb-4 p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-600 text-sm">
             {error}
@@ -312,7 +312,7 @@ export default function LoginForm() {
       {showSetPasswordDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4">
           <div className="w-full max-w-md max-h-[90svh] overflow-y-auto rounded-2xl bg-white border border-stone-200 shadow-2xl p-5 sm:p-6">
-            <h2 className="text-xl font-serif font-light text-stone-800 mb-1">
+            <h2 className="text-xl font-serif font-medium text-stone-900 mb-1">
               Set Your Password
             </h2>
             <p className="text-sm text-stone-600 mb-5">

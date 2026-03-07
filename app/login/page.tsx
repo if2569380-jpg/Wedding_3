@@ -85,12 +85,12 @@ export default function LoginPage() {
             className="text-white"
           >
             <p
-              className="text-3xl md:text-4xl font-light mb-3"
+              className="text-3xl md:text-4xl font-medium mb-3"
               style={{ fontFamily: "'Dancing Script', cursive" }}
             >
               Our Wedding Gallery
             </p>
-            <p className="text-white/80 text-sm font-sans tracking-wide">
+            <p className="text-white/90 text-sm font-sans tracking-[0.04em]">
               Capturing moments, creating memories
             </p>
           </motion.div>
@@ -102,7 +102,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.8 }}
-            className="flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2"
+            className="flex items-center gap-2 bg-white/15 backdrop-blur-md rounded-xl px-4 py-2 border border-white/30 shadow-lg shadow-black/20"
           >
             <Heart className="w-4 h-4 text-rose-400" fill="currentColor" />
             <span className="text-white/90 text-xs font-sans tracking-wider">Private Gallery</span>

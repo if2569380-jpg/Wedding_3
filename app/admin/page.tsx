@@ -204,9 +204,9 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 sm:space-y-8">
       {/* Welcome */}
-      <div className="bg-gradient-to-r from-rose-400 via-rose-500 to-pink-500 rounded-2xl p-5 sm:p-8 text-white shadow-xl shadow-rose-200">
-        <h1 className="text-2xl sm:text-3xl font-serif font-light mb-2">Welcome to Wedding Admin</h1>
-        <p className="text-white/80 font-sans">
+      <div className="bg-gradient-to-r from-rose-500 via-rose-600 to-pink-600 rounded-2xl p-5 sm:p-8 text-white shadow-2xl shadow-rose-300/60 border border-white/25">
+        <h1 className="text-2xl sm:text-3xl font-serif font-medium mb-2">Welcome to Wedding Admin</h1>
+        <p className="text-white/90 font-sans">
           Manage your wedding photo gallery, upload new memories, and review guest engagement.
         </p>
       </div>
@@ -216,7 +216,7 @@ export default function AdminDashboard() {
         {statCards.map((stat) => (
           <div
             key={stat.name}
-            className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-100 hover:shadow-md transition-shadow"
+            className="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-stone-200 hover:shadow-lg hover:shadow-stone-200/60 transition-shadow"
           >
             <div className="flex items-center gap-4">
               <div

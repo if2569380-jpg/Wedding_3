@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+:root {
+  --surface: #f7f5f1;
+  --text-strong: #1f1d1a;
+  --text-soft: #5e5a53;
+  --edge-soft: #d8d1c7;
+}
+
 /* Custom Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
@@ -33,6 +40,36 @@ html {
 body {
   min-width: 360px;
   text-wrap: pretty;
+  color: var(--text-strong);
+  background:
+    radial-gradient(140% 100% at 0% 0%, #fdfbf7 0%, transparent 60%),
+    radial-gradient(120% 80% at 100% 0%, #f3eee6 0%, transparent 55%),
+    var(--surface);
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3 {
+  letter-spacing: -0.012em;
+  color: var(--text-strong);
+}
+
+button {
+  font-weight: 600;
+}
+
+input,
+select,
+textarea {
+  border-color: var(--edge-soft);
+  box-shadow: 0 1px 0 rgba(23, 19, 14, 0.05);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--text-soft);
 }
 
 /* Ken Burns Effect for Slideshow */
