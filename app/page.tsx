@@ -205,7 +205,7 @@ const WEDDING_SECTIONS = [
     description: "It all started with a simple hello. From that moment, we knew our lives would never be the same. Every conversation felt like coming home.",
     color: "bg-[#fdfcf8]",
     textColor: "text-stone-800",
-    image: "https://picsum.photos/seed/wedding1/1200/1600",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/e2f0393f-98af-4204-bbfb-c35466695a02-1772830664406.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvZTJmMDM5M2YtOThhZi00MjA0LWJiZmItYzM1NDY2Njk1YTAyLTE3NzI4MzA2NjQ0MDYuamZpZiIsImlhdCI6MTc3Mjg3OTg5NSwiZXhwIjoxNzcyODgzNDk1fQ.lQ0xw6JTfox4lvCinlFzGdsRUx2xU8nnag0zTT2wUxk",
     icon: <Heart className="w-6 h-6 text-rose-400" />,
   },
   {
