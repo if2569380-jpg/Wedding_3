@@ -7,6 +7,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import ShiftingCountdown from '@/components/ui/countdown-timer';
 import GuestMusic from '@/components/GuestMusic';
+import PhotoCollageSection from '@/components/PhotoCollageSection';
 import { HERO_IMAGE_URL } from '@/lib/heroImage';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -505,6 +506,9 @@ export default function Home() {
           </section>
         ))}
       </div>
+
+      {/* Photo Collage Section */}
+      <PhotoCollageSection />
 
       {/* Final Section */}
       <section id="contact" className="scroll-mt-24 min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a1a] via-[#252525] to-[#1a1a1a] text-white px-4 sm:px-8 py-12 sm:py-10 text-center relative z-50 overflow-hidden">

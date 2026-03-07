@@ -110,7 +110,7 @@ function PhotoCard({ photo, index, viewMode, isMobile, showWatermark, watermarkT
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       style={isMobile ? undefined : tiltStyle}
-      className={`group relative cursor-pointer overflow-hidden rounded-xl transition-transform duration-200 ease-out ${
+      className={`group relative cursor-pointer overflow-hidden rounded-xl transition-transform duration-200 ease-out border border-stone-200/80 shadow-[0_10px_30px_rgba(25,20,14,0.12)] ${
         viewMode === 'masonry' ? 'break-inside-avoid' : 'aspect-square'
       }`}
     >
@@ -135,12 +135,12 @@ function PhotoCard({ photo, index, viewMode, isMobile, showWatermark, watermarkT
       )}
       
       {/* Hover Overlay */}
-      <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent transition-opacity duration-300 ${
+      <div className={`absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent transition-opacity duration-300 ${
         isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
       }`}>
         <div className="absolute bottom-0 left-0 right-0 p-4">
-          <p className="text-white font-serif text-lg">{photo.alt}</p>
-          <p className="text-white/70 text-xs uppercase tracking-widest font-sans mt-1">
+          <p className="text-white font-serif font-medium text-lg">{photo.alt}</p>
+          <p className="text-white/80 text-xs uppercase tracking-[0.14em] font-sans mt-1">
             {photo.category}
           </p>
         </div>
@@ -149,7 +149,7 @@ function PhotoCard({ photo, index, viewMode, isMobile, showWatermark, watermarkT
         {settings.allow_favorites && (
           <button
             onClick={onToggleFavorite}
-            className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
+            className="absolute top-3 right-3 w-10 h-10 rounded-xl border border-white/40 bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/35 transition-colors shadow-lg"
           >
             <Heart
               className={`w-5 h-5 transition-colors ${
@@ -168,7 +168,7 @@ function PhotoCard({ photo, index, viewMode, isMobile, showWatermark, watermarkT
 // Skeleton Loading Component
 function PhotoSkeleton({ viewMode }: { viewMode: 'masonry' | 'grid' }) {
   return (
-    <div className={`animate-pulse bg-stone-200 rounded-xl overflow-hidden ${
+    <div className={`animate-pulse bg-stone-200 rounded-xl overflow-hidden border border-stone-200 shadow-sm ${
       viewMode === 'grid' ? 'aspect-square' : 'h-64'
     }`}>
       <div className="w-full h-full bg-gradient-to-r from-stone-200 via-stone-300 to-stone-200 animate-shimmer" />
@@ -283,6 +283,8 @@ export default function GalleryPage() {
   const watermarkText = String(settings.watermark_text || settings.gallery_title).trim();
   const showWatermark = settings.watermark_enabled && watermarkText.length > 0;
   const selectedPhotoData = selectedPhoto !== null ? filteredPhotos[selectedPhoto] ?? null : null;
+  const hasSearchQuery = searchQuery.trim().length > 0;
+  const hasActiveFilters = selectedCategory !== 'All' || hasSearchQuery;
 
   const trackAnalyticsEvent = useCallback(
     (eventType: AnalyticsEventType, photoId?: string) => {
@@ -339,6 +341,20 @@ export default function GalleryPage() {
     }
   }, [itemsPerPage, searchQuery, selectedCategory]);
 
+  const clearAllFilters = useCallback(() => {
+    setSelectedCategory('All');
+    setSearchQuery('');
+    setShowSuggestions(false);
+  }, []);
+
+  const handleManualLoadMore = useCallback(() => {
+    if (!canLoadMore || loadingMore || !nextCursor) return;
+    setLoadingMore(true);
+    void loadPhotos(nextCursor, 'append').finally(() => {
+      setLoadingMore(false);
+    });
+  }, [canLoadMore, loadPhotos, loadingMore, nextCursor]);
+
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       void loadPhotos(null, 'replace');
@@ -353,11 +369,8 @@ export default function GalleryPage() {
     
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && canLoadMore && !loadingMore && nextCursor) {
-          setLoadingMore(true);
-          void loadPhotos(nextCursor, 'append').finally(() => {
-            setLoadingMore(false);
-          });
+        if (entries[0].isIntersecting) {
+          handleManualLoadMore();
         }
       },
       { rootMargin: '100px', threshold: 0.1 }
@@ -365,7 +378,7 @@ export default function GalleryPage() {
 
     observer.observe(loadMoreRef.current);
     return () => observer.disconnect();
-  }, [canLoadMore, loadPhotos, loadingMore, nextCursor]);
+  }, [canLoadMore, handleManualLoadMore]);
 
   useEffect(() => {
     if (selectedPhoto === null) return;
@@ -821,45 +834,45 @@ export default function GalleryPage() {
   return (
     <main className="min-h-screen bg-[#fdfcf8]">
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#fdfcf8]/90 backdrop-blur-md border-b border-stone-200/50">
-        <div className="safe-container px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+      <header className="sticky top-0 z-40 bg-[#fdfcf8]/95 backdrop-blur-xl border-b border-stone-200/70 shadow-[0_2px_16px_rgba(20,16,12,0.06)]">
+        <div className="safe-container px-3 sm:px-6 lg:px-8 py-3 sm:py-4">
           {/* Mobile Header */}
-          <div className="sm:hidden space-y-3">
-            <h1 className="w-full text-center text-xl font-serif font-medium text-stone-900 px-1 leading-tight">
+          <div className="sm:hidden space-y-2.5">
+            <h1 className="w-full text-center text-[clamp(1.7rem,6.5vw,2rem)] font-serif font-medium text-stone-900 px-1 leading-tight">
               {settings.gallery_title}
             </h1>
-            <div className="flex items-center justify-between gap-3">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2.5">
               <Link
                 href="/"
-                className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors min-h-11"
+                className="inline-flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors min-h-10"
               >
-                <ArrowLeft className="w-5 h-5" />
-                <span className="font-sans text-xs uppercase tracking-[0.12em]">Back</span>
+                <ArrowLeft className="w-4 h-4" />
+                <span className="font-sans text-[11px] uppercase tracking-[0.09em] max-[360px]:hidden">Back</span>
               </Link>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
                   onClick={() => setViewMode(viewMode === 'masonry' ? 'grid' : 'masonry')}
-                  className="w-11 h-11 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
+                  className="w-10 h-10 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
                   title={viewMode === 'masonry' ? 'Switch to Grid View' : 'Switch to Masonry View'}
                 >
-                  {viewMode === 'masonry' ? <Grid3X3 className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
+                  {viewMode === 'masonry' ? <Grid3X3 className="w-4 h-4" /> : <LayoutGrid className="w-4 h-4" />}
                 </button>
                 {settings.allow_fullscreen && (
                   <button
                     onClick={toggleFullscreen}
-                    className="w-11 h-11 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
+                    className="w-10 h-10 rounded-xl bg-stone-200/90 text-stone-700 hover:bg-stone-300 transition-colors flex items-center justify-center border border-stone-300/80 shadow-sm"
                     title="Toggle Fullscreen"
                   >
-                    {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                    {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                   </button>
                 )}
                 <button
                   onClick={handleLogout}
                   disabled={loggingOut}
-                  className="w-11 h-11 rounded-xl bg-rose-100 text-rose-700 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center border border-rose-200/90 shadow-sm"
+                  className="w-10 h-10 rounded-xl bg-rose-100 text-rose-700 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center border border-rose-200/90 shadow-sm"
                   title="Sign Out"
                 >
-                  <LogOut className="w-5 h-5" />
+                  <LogOut className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -919,77 +932,130 @@ export default function GalleryPage() {
 
       {/* Category Filter & Search */}
       {settings.show_category_filter && (
-        <div className="safe-container px-4 sm:px-6 lg:px-8 py-5 sm:py-6 md:py-8">
-          {/* Responsive Layout: Mobile stack, Tablet/Desktop row */}
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
-            {/* Categories - Horizontal scroll on mobile, flex wrap on larger screens */}
-            <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center lg:justify-start gap-2 sm:gap-3 overflow-x-auto pb-1 px-0.5 scrollbar-hide lg:overflow-visible lg:pb-0 lg:flex-1">
-              {CATEGORIES.map((category) => (
-                <button
-                  key={category}
-                  onClick={() => setSelectedCategory(category)}
-                  className={`control-pill whitespace-nowrap font-sans text-xs sm:text-sm md:text-base uppercase tracking-[0.08em] sm:tracking-wider transition-all duration-300 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-full ${
-                    selectedCategory === category
-                      ? 'bg-stone-800 text-white shadow-md'
-                      : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
-                  }`}
-                >
-                  {category}
-                </button>
-              ))}
-            </div>
-            
-            {/* Right side: Search + Photo Count */}
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 lg:gap-6">
-              {/* Search Input with Suggestions */}
-              <div className="relative w-full sm:w-56 md:w-64 lg:w-72">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-stone-400 z-10" />
-                <input
-                  type="text"
-                  placeholder="Search photos..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setShowSuggestions(true);
-                  }}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="w-full pl-9 md:pl-10 pr-4 py-2.5 md:py-3 rounded-full border border-stone-200 bg-white text-sm md:text-base focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all shadow-sm"
-                />
-                
-                {/* Suggestions Dropdown */}
-                {showSuggestions && suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 py-2 z-50 w-full min-w-0 max-h-56 overflow-y-auto">
-                    {suggestions.map((suggestion, index) => (
-                      <button
-                        key={index}
-                        onClick={() => {
-                          setSearchQuery(suggestion);
-                          setShowSuggestions(false);
-                        }}
-                        className="w-full px-4 py-2.5 text-left text-sm md:text-base text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-2"
-                      >
-                        <Search className="w-3 h-3 md:w-4 md:h-4 text-stone-400" />
-                        <span className="truncate">{suggestion}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+        <div className="safe-container px-3 sm:px-6 lg:px-8 py-4 sm:py-6 md:py-8">
+          <div className="rounded-2xl border border-stone-200/90 bg-white/92 p-3.5 sm:p-5 md:p-6 shadow-[0_10px_35px_rgba(25,20,14,0.08)] backdrop-blur-sm">
+            {/* Responsive Layout: Mobile stack, Tablet/Desktop row */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3.5 lg:gap-6">
+              {/* Categories - Horizontal scroll on mobile, flex wrap on larger screens */}
+              <div className="relative">
+                <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center lg:justify-start gap-2 sm:gap-3 overflow-x-auto pb-1 pr-4 px-0.5 scrollbar-hide lg:overflow-visible lg:pb-0 lg:flex-1 snap-x snap-mandatory">
+                {CATEGORIES.map((category) => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`shrink-0 snap-start whitespace-nowrap font-sans text-[13px] sm:text-sm md:text-base uppercase tracking-[0.06em] transition-all duration-300 h-10 px-4 sm:px-4 md:px-5 rounded-full border ${
+                      selectedCategory === category
+                        ? 'bg-stone-900 border-stone-900 text-white shadow-md shadow-stone-300/70'
+                        : 'bg-stone-100 border-stone-200 text-stone-700 hover:bg-stone-200'
+                    }`}
+                  >
+                    {category}
+                  </button>
+                ))}
+                </div>
+                <div className="pointer-events-none absolute right-0 top-0 h-full w-8 bg-gradient-to-l from-white/95 to-transparent sm:hidden" />
               </div>
               
-              {/* Photo Count */}
-              {settings.show_photo_count && (
-                <span className="text-stone-500 font-sans text-xs sm:text-sm md:text-base text-center sm:text-right whitespace-nowrap">
-                  {displayedCount} of {totalCount} photo{totalCount !== 1 ? 's' : ''}
-                </span>
-              )}
+              {/* Right side: Search + Photo Count */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 lg:gap-6">
+                {/* Search Input with Suggestions */}
+                <div className="relative w-full sm:w-56 md:w-64 lg:w-72">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-stone-500 z-10" />
+                  <input
+                    type="text"
+                    placeholder="Search photos..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSuggestions(true);
+                    }}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="w-full pl-9 md:pl-10 pr-10 py-2.5 md:py-3 rounded-xl border border-stone-300 bg-white text-sm md:text-base focus:border-stone-500 focus:ring-2 focus:ring-stone-100 outline-none transition-all shadow-sm"
+                  />
+                  {hasSearchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearchQuery('');
+                        setShowSuggestions(false);
+                      }}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-lg text-stone-500 hover:text-stone-700 hover:bg-stone-100 transition-colors flex items-center justify-center"
+                      aria-label="Clear search"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                  
+                  {/* Suggestions Dropdown */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-200 py-2 z-50 w-full min-w-0 max-h-56 overflow-y-auto">
+                      {suggestions.map((suggestion, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setSearchQuery(suggestion);
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-sm md:text-base text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                        >
+                          <Search className="w-3 h-3 md:w-4 md:h-4 text-stone-400" />
+                          <span className="truncate">{suggestion}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                {/* Photo Count */}
+                {settings.show_photo_count && (
+                  <span className="text-stone-600 font-sans text-xs sm:text-sm md:text-base text-center sm:text-right whitespace-nowrap font-medium">
+                    {displayedCount} of {totalCount} photo{totalCount !== 1 ? 's' : ''}
+                  </span>
+                )}
+              </div>
             </div>
+
+            {hasActiveFilters && (
+              <div className="mt-4 flex flex-wrap items-center gap-2 sm:gap-3">
+                <span className="text-[11px] uppercase tracking-[0.12em] text-stone-500 font-sans">Active filters</span>
+                {selectedCategory !== 'All' && (
+                  <span className="inline-flex items-center rounded-lg border border-stone-300 bg-stone-100 px-2.5 py-1 text-xs font-sans text-stone-700">
+                    Category: {selectedCategory}
+                  </span>
+                )}
+                {hasSearchQuery && (
+                  <span className="inline-flex items-center rounded-lg border border-stone-300 bg-stone-100 px-2.5 py-1 text-xs font-sans text-stone-700">
+                    Search: {searchQuery.trim()}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={clearAllFilters}
+                  className="inline-flex items-center gap-1 rounded-lg border border-stone-300 bg-white px-2.5 py-1 text-xs font-sans text-stone-700 hover:bg-stone-100 transition-colors"
+                >
+                  <X className="w-3.5 h-3.5" />
+                  Reset
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Compact toolbar when category filter block is disabled */}
+      {!settings.show_category_filter && settings.show_photo_count && (
+        <div className="safe-container px-4 sm:px-6 lg:px-8 py-4">
+          <div className="rounded-xl border border-stone-200/90 bg-white/80 px-4 py-2.5 shadow-sm">
+            <span className="text-stone-600 font-sans text-xs sm:text-sm font-medium">
+              {displayedCount} of {totalCount} photo{totalCount !== 1 ? 's' : ''}
+            </span>
           </div>
         </div>
       )}
 
       {/* Photo Grid */}
-      <div className="safe-container px-3 sm:px-6 lg:px-8 xl:px-10 pb-14 sm:pb-16 md:pb-20">
+      <div className="safe-container px-2.5 sm:px-6 lg:px-8 xl:px-10 pb-14 sm:pb-16 md:pb-20">
         {loading ? (
             <div className={
               viewMode === 'masonry'
@@ -1002,17 +1068,28 @@ export default function GalleryPage() {
           </div>
         ) : error ? (
           <div className="text-center py-20">
-            <p className="text-rose-600 font-sans">{error}</p>
+            <p className="text-rose-600 font-sans font-medium">{error}</p>
             <button
               onClick={() => window.location.reload()}
-              className="mt-4 px-6 py-2 bg-stone-800 text-white rounded-lg hover:bg-stone-700 transition-colors"
+              className="mt-4 px-6 py-2.5 bg-stone-900 text-white rounded-xl border border-stone-900 hover:bg-stone-800 transition-colors shadow-md"
             >
               Retry
             </button>
           </div>
         ) : photos.length === 0 ? (
           <div className="text-center py-20">
-            <p className="text-stone-600 font-sans">No photos available yet.</p>
+            <p className="text-stone-700 font-sans font-medium">
+              {hasActiveFilters ? 'No photos found for your current filters.' : 'No photos available yet.'}
+            </p>
+            {hasActiveFilters && (
+              <button
+                type="button"
+                onClick={clearAllFilters}
+                className="mt-4 px-5 py-2 rounded-xl border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 transition-colors font-sans text-sm"
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         ) : (
           <>
@@ -1052,7 +1129,18 @@ export default function GalleryPage() {
                 </div>
               )}
               {canLoadMore && !loadingMore && (
-                <div className="h-8" /> /* Spacer for intersection observer */
+                <button
+                  type="button"
+                  onClick={handleManualLoadMore}
+                  className="min-h-11 px-5 py-2.5 rounded-xl border border-stone-300 bg-white text-stone-700 hover:bg-stone-100 transition-colors font-sans text-sm shadow-sm"
+                >
+                  Load more photos
+                </button>
+              )}
+              {!canLoadMore && !loadingMore && filteredPhotos.length > 0 && (
+                <p className="text-xs sm:text-sm uppercase tracking-[0.1em] text-stone-400 font-sans">
+                  You&apos;ve reached the end
+                </p>
               )}
             </div>
           </>
