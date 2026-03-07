@@ -215,7 +215,7 @@ const WEDDING_SECTIONS = [
     description: "Under the starlit sky, with the sound of waves crashing against the shore, he asked the question that would change our forever. She said yes.",
     color: "bg-[#f5f2ed]",
     textColor: "text-stone-800",
-    image: "https://picsum.photos/seed/wedding2/1200/1600",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/cfc8fac2-ad0a-4e8d-a9d1-7d934c682fb1-1772828895513.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvY2ZjOGZhYzItYWQwYS00ZThkLWE5ZDEtN2Q5MzRjNjgyZmIxLTE3NzI4Mjg4OTU1MTMuamZpZiIsImlhdCI6MTc3Mjg3NTc1MywiZXhwIjoxNzcyODc5MzUzfQ.9GWwBlDKMMqjHRCnIQGKmS0KrO2ZSf2OWmuR25uX7to",
     icon: <Sparkles className="w-6 h-6 text-amber-400" />,
   },
   {
@@ -235,7 +235,7 @@ const WEDDING_SECTIONS = [
     description: "The music played, the wine flowed, and we danced our first dance as husband and wife. A celebration of a love that will last an eternity.",
     color: "bg-[#5a5a40]",
     textColor: "text-stone-100",
-    image: "https://picsum.photos/seed/wedding4/1200/1600",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/1da8e16b-3082-4c77-967d-82a0ee36e8b2-1772828877550.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvMWRhOGUxNmItMzA4Mi00Yzc3LTk2N2QtODJhMGVlMzZlOGIyLTE3NzI4Mjg4Nzc1NTAuamZpZiIsImlhdCI6MTc3Mjg3NTc1MywiZXhwIjoxNzcyODc5MzUzfQ.zxx5u33Yl0Hrkq_HpbphKb97ycWzpLpTtrDUPnah9TU",
     icon: <Music className="w-6 h-6 text-stone-200" />,
   },
   {
@@ -246,7 +246,7 @@ const WEDDING_SECTIONS = [
     description: "Counting down to the next November 1 celebration of our marriage and memories together.",
     color: "bg-[#4a4a30]",
     textColor: "text-stone-100",
-    image: "https://picsum.photos/seed/anniversary/1200/1600",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/59181363-2d7c-427f-959c-509a4dd4d0d1-1772828921774.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvNTkxODEzNjMtMmQ3Yy00MjdmLTk1OWMtNTA5YTRkZDRkMGQxLTE3NzI4Mjg5MjE3NzQuamZpZiIsImlhdCI6MTc3Mjg3NTc1MywiZXhwIjoxNzcyODc5MzUzfQ.RtOi-7YQMkXC5Lk0_-FetYk-ghEdYmUzGKrd5kFJco4",
     icon: <Timer className="w-6 h-6 text-rose-300" />,
   }
 ];
