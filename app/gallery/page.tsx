@@ -769,8 +769,51 @@ export default function GalleryPage() {
     <main className="min-h-screen bg-[#fdfcf8]">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-[#fdfcf8]/90 backdrop-blur-md border-b border-stone-200/50">
-        <div className="safe-container py-3 sm:py-4">
-          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+        <div className="safe-container px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
+          {/* Mobile Header */}
+          <div className="sm:hidden space-y-3">
+            <h1 className="w-full text-center text-xl font-serif font-light text-stone-800 px-1 leading-tight">
+              {settings.gallery_title}
+            </h1>
+            <div className="flex items-center justify-between gap-3">
+              <Link
+                href="/"
+                className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors min-h-11"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                <span className="font-sans text-xs uppercase tracking-[0.2em]">Back</span>
+              </Link>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setViewMode(viewMode === 'masonry' ? 'grid' : 'masonry')}
+                  className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
+                  title={viewMode === 'masonry' ? 'Switch to Grid View' : 'Switch to Masonry View'}
+                >
+                  {viewMode === 'masonry' ? <Grid3X3 className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
+                </button>
+                {settings.allow_fullscreen && (
+                  <button
+                    onClick={toggleFullscreen}
+                    className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
+                    title="Toggle Fullscreen"
+                  >
+                    {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                  </button>
+                )}
+                <button
+                  onClick={handleLogout}
+                  disabled={loggingOut}
+                  className="w-11 h-11 rounded-full bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors disabled:opacity-50 flex items-center justify-center"
+                  title="Sign Out"
+                >
+                  <LogOut className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop/Tablet Header */}
+          <div className="hidden sm:flex items-center justify-between gap-4">
             <Link
               href="/"
               className="flex items-center gap-2 text-stone-600 hover:text-stone-800 transition-colors min-h-11"
@@ -778,11 +821,10 @@ export default function GalleryPage() {
               <ArrowLeft className="w-5 h-5" />
               <span className="font-sans text-xs sm:text-sm uppercase tracking-[0.2em] sm:tracking-widest">Back</span>
             </Link>
-            <h1 className="order-first sm:order-none w-full sm:w-auto text-center sm:text-left text-xl sm:text-2xl md:text-3xl font-serif font-light text-stone-800 px-1">
+            <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-serif font-light text-stone-800 px-1 truncate">
               {settings.gallery_title}
             </h1>
-            <div className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-end">
-              {/* View Mode Toggle */}
+            <div className="flex items-center gap-2 justify-end">
               <button
                 onClick={() => setViewMode(viewMode === 'masonry' ? 'grid' : 'masonry')}
                 className="w-11 h-11 rounded-full bg-stone-200 text-stone-600 hover:bg-stone-300 transition-colors flex items-center justify-center"
@@ -790,7 +832,6 @@ export default function GalleryPage() {
               >
                 {viewMode === 'masonry' ? <Grid3X3 className="w-5 h-5" /> : <LayoutGrid className="w-5 h-5" />}
               </button>
-              {/* Fullscreen Toggle */}
               {settings.allow_fullscreen && (
                 <button
                   onClick={toggleFullscreen}
@@ -800,7 +841,6 @@ export default function GalleryPage() {
                   {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
                 </button>
               )}
-              {/* Logout */}
               <button
                 onClick={handleLogout}
                 disabled={loggingOut}
@@ -816,7 +856,7 @@ export default function GalleryPage() {
 
       {/* Welcome Banner for Family Members */}
       {showWelcome && familyMember && (
-        <div className="safe-container pt-5 sm:pt-6">
+        <div className="safe-container px-4 sm:px-6 lg:px-8 pt-5 sm:pt-6">
           <WelcomeBanner
             member={familyMember}
             onDismiss={() => setShowWelcome(false)}
@@ -826,10 +866,10 @@ export default function GalleryPage() {
 
       {/* Category Filter & Search */}
       {settings.show_category_filter && (
-        <div className="safe-container py-5 sm:py-8">
+        <div className="safe-container px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
           {/* Categories, Search and Photo Count in one row */}
           <div className="mobile-stack-gap sm:block">
-            <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-1 scrollbar-hide">
+            <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-1 px-0.5 scrollbar-hide">
               {CATEGORIES.map((category) => (
                 <button
                   key={category}
@@ -891,7 +931,7 @@ export default function GalleryPage() {
       )}
 
       {/* Photo Grid */}
-      <div className="safe-container pb-14 sm:pb-16">
+      <div className="safe-container px-4 sm:px-6 lg:px-8 pb-14 sm:pb-16">
         {loading ? (
           <div className={
             viewMode === 'masonry'
