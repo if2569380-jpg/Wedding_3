@@ -85,7 +85,7 @@ export async function PUT(request: NextRequest) {
     }
 
     const storyRows = validated.storyCards.map((item, index) => ({
-      ...(item.id ? { id: item.id } : {}),
+      id: item.id || crypto.randomUUID(),
       title: item.title,
       subtitle: item.subtitle,
       description: item.description,
@@ -102,7 +102,7 @@ export async function PUT(request: NextRequest) {
     }));
 
     const collageRows = validated.collageItems.map((item, index) => ({
-      ...(item.id ? { id: item.id } : {}),
+      id: item.id || crypto.randomUUID(),
       caption: item.caption,
       image_path: item.image_path,
       image_alt: item.image_alt,
@@ -111,14 +111,18 @@ export async function PUT(request: NextRequest) {
     }));
 
     if (storyRows.length > 0) {
-      const { error } = await admin.from('landing_story_cards').upsert(storyRows, { onConflict: 'id' });
+      const { error } = await admin
+        .from('landing_story_cards')
+        .upsert(storyRows, { onConflict: 'id', defaultToNull: false });
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }
     }
 
     if (collageRows.length > 0) {
-      const { error } = await admin.from('landing_collage_items').upsert(collageRows, { onConflict: 'id' });
+      const { error } = await admin
+        .from('landing_collage_items')
+        .upsert(collageRows, { onConflict: 'id', defaultToNull: false });
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 });
       }

@@ -513,7 +513,7 @@ export default function Home() {
         {resolvedStorySections.map((section, index) => (
           <section
             key={section.id}
-            id={STORY_SECTION_ANCHORS[index]}
+            id={STORY_SECTION_ANCHORS[index] || `story-${index + 1}`}
             className={`md:sticky md:top-0 scroll-mt-24 min-h-[88svh] md:h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-12 ${
               STORY_BACKGROUND_CLASS_MAP[section.background_token] || STORY_BACKGROUND_CLASS_MAP.ivory
             } ${STORY_TEXT_CLASS_MAP[section.text_token] || STORY_TEXT_CLASS_MAP.stone_dark} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AlertCircle,
   ArrowDown,
@@ -87,6 +87,7 @@ function normalizeCollageOrder(items: CollageItemForm[]) {
 }
 
 export default function AdminLandingContentPage() {
+  const autoBootstrapAttemptedRef = useRef(false);
   const [storyCards, setStoryCards] = useState<StoryCardForm[]>([]);
   const [collageItems, setCollageItems] = useState<CollageItemForm[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,8 +130,30 @@ export default function AdminLandingContentPage() {
         throw new Error(payload.error || 'Failed to load landing content');
       }
 
-      setStoryCards(normalizeStoryOrder(payload.storyCards || []));
-      setCollageItems(normalizeCollageOrder(payload.collageItems || []));
+      const fetchedStory = payload.storyCards || [];
+      const fetchedCollage = payload.collageItems || [];
+
+      if (
+        fetchedStory.length === 0 &&
+        fetchedCollage.length === 0 &&
+        !autoBootstrapAttemptedRef.current
+      ) {
+        autoBootstrapAttemptedRef.current = true;
+        const bootstrapResponse = await fetch('/api/admin/landing-content/bootstrap', {
+          method: 'POST',
+        });
+
+        if (bootstrapResponse.ok) {
+          const bootstrapPayload = (await bootstrapResponse.json()) as { skipped?: boolean };
+          if (!bootstrapPayload.skipped) {
+            await fetchLandingContent();
+            return;
+          }
+        }
+      }
+
+      setStoryCards(normalizeStoryOrder(fetchedStory));
+      setCollageItems(normalizeCollageOrder(fetchedCollage));
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : 'Failed to load landing content');
     } finally {
