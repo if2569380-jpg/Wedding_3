@@ -156,7 +156,11 @@ function Navigation() {
 
             {/* Mobile menu button */}
             <button
+              type="button"
               onClick={() => setIsOpen(!isOpen)}
+              aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+              aria-expanded={isOpen}
+              aria-controls="mobile-nav-menu"
               className={`md:hidden p-2.5 rounded-full border border-transparent min-h-11 min-w-11 transition-colors ${
                 scrolled ? 'text-stone-800' : 'text-white'
               }`}
@@ -171,6 +175,7 @@ function Navigation() {
       <AnimatePresence>
         {isOpen && (
           <motion.div
+            id="mobile-nav-menu"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
