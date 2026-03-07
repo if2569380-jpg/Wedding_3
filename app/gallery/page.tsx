@@ -18,8 +18,10 @@ import {
   RotateCcw,
   Download,
   Share2,
-  Copy,
   Check,
+  Link2,
+  Send,
+  Mail,
   LogOut,
   Search
 } from 'lucide-react';
@@ -195,6 +197,7 @@ export default function GalleryPage() {
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const slideshowRef = useRef<NodeJS.Timeout | null>(null);
   const imageContainerRef = useRef<HTMLDivElement>(null);
+  const deepLinkHandledRef = useRef(false);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const lastTapTime = useRef<number>(0);
@@ -270,6 +273,7 @@ export default function GalleryPage() {
   const canLoadMore = hasMore && nextCursor !== null;
   const watermarkText = String(settings.watermark_text || settings.gallery_title).trim();
   const showWatermark = settings.watermark_enabled && watermarkText.length > 0;
+  const selectedPhotoData = selectedPhoto !== null ? filteredPhotos[selectedPhoto] ?? null : null;
 
   const loadPhotos = useCallback(async (cursor: string | null, mode: 'replace' | 'append') => {
     try {
@@ -392,6 +396,20 @@ export default function GalleryPage() {
     void ensureFullImageUrl(photo);
   }, [ensureFullImageUrl, filteredPhotos, selectedPhoto]);
 
+  // Keep URL in sync with currently selected image for easy sharing.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const url = new URL(window.location.href);
+    if (selectedPhotoData) {
+      url.searchParams.set('photoId', selectedPhotoData.id);
+    } else {
+      url.searchParams.delete('photoId');
+    }
+
+    window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`);
+  }, [selectedPhotoData]);
+
   const handleLogout = async () => {
     setLoggingOut(true);
     const supabase = createClient();
@@ -463,6 +481,30 @@ export default function GalleryPage() {
       void ensureFullImageUrl(photo);
     }
   }, [ensureFullImageUrl, filteredPhotos]);
+
+  // Open a specific image when gallery URL contains a shared photo id.
+  useEffect(() => {
+    if (deepLinkHandledRef.current || filteredPhotos.length === 0) return;
+    if (typeof window === 'undefined') return;
+
+    const params = new URL(window.location.href).searchParams;
+    const photoIdFromUrl = params.get('photoId');
+    const legacyPhotoIndex = Number.parseInt(params.get('photo') ?? '', 10);
+
+    if (!photoIdFromUrl && !Number.isFinite(legacyPhotoIndex)) {
+      deepLinkHandledRef.current = true;
+      return;
+    }
+
+    const index = photoIdFromUrl
+      ? filteredPhotos.findIndex((photo) => photo.id === photoIdFromUrl)
+      : legacyPhotoIndex;
+
+    if (index >= 0 && index < filteredPhotos.length) {
+      openLightbox(index);
+      deepLinkHandledRef.current = true;
+    }
+  }, [filteredPhotos, openLightbox]);
 
   const closeLightbox = useCallback(() => {
     setSelectedPhoto(null);
@@ -541,23 +583,53 @@ export default function GalleryPage() {
     }
   }, [ensureFullImageUrl, selectedPhoto, filteredPhotos]);
 
-  // Share: copy link
+  // Share
   const shareUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}${window.location.pathname}?photo=${selectedPhoto ?? 0}`
+    ? (() => {
+        const url = new URL(window.location.href);
+        if (selectedPhotoData) {
+          url.searchParams.set('photoId', selectedPhotoData.id);
+        }
+        return `${url.origin}${url.pathname}${url.search}`;
+      })()
     : '';
-  const shareText = selectedPhoto !== null
-    ? `Wedding photo: ${filteredPhotos[selectedPhoto]?.alt ?? 'Our wedding'}`
+  const shareText = selectedPhotoData
+    ? `Wedding photo: ${selectedPhotoData.alt}`
     : 'Our wedding gallery';
+  const canNativeShare = typeof navigator !== 'undefined' && typeof navigator.share === 'function';
 
   const handleCopyLink = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setLinkCopied(true);
+      setShareMenuOpen(false);
       setTimeout(() => setLinkCopied(false), 2000);
     } catch {
       setLinkCopied(false);
     }
   }, [shareUrl]);
+
+  const handleNativeShare = useCallback(async () => {
+    if (!selectedPhotoData) return;
+
+    if (!canNativeShare) {
+      await handleCopyLink();
+      return;
+    }
+
+    try {
+      await navigator.share({
+        title: selectedPhotoData.alt,
+        text: shareText,
+        url: shareUrl,
+      });
+      setShareMenuOpen(false);
+    } catch (error) {
+      if ((error as Error).name !== 'AbortError') {
+        await handleCopyLink();
+      }
+    }
+  }, [canNativeShare, handleCopyLink, selectedPhotoData, shareText, shareUrl]);
 
   const handleShareWhatsApp = useCallback(() => {
     const url = `https://wa.me/?text=${encodeURIComponent(shareText + ' ' + shareUrl)}`;
@@ -570,6 +642,24 @@ export default function GalleryPage() {
     window.open(url, '_blank', 'noopener,noreferrer');
     setShareMenuOpen(false);
   }, [shareUrl]);
+
+  const openShareTarget = useCallback((url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+    setShareMenuOpen(false);
+  }, []);
+
+  const handleShareTelegram = useCallback(() => {
+    openShareTarget(`https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(shareText)}`);
+  }, [openShareTarget, shareText, shareUrl]);
+
+  const handleShareX = useCallback(() => {
+    openShareTarget(`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`);
+  }, [openShareTarget, shareText, shareUrl]);
+
+  const handleShareEmail = useCallback(() => {
+    window.location.href = `mailto:?subject=${encodeURIComponent(shareText)}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
+    setShareMenuOpen(false);
+  }, [shareText, shareUrl]);
 
   // Pan functionality
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -941,25 +1031,60 @@ export default function GalleryPage() {
                           onClick={(e) => { e.stopPropagation(); setShareMenuOpen(false); }}
                           aria-hidden
                         />
-                        <div className="absolute right-0 top-12 z-50 min-w-[180px] rounded-xl bg-stone-800/95 backdrop-blur-md border border-white/10 shadow-xl py-2">
+                        <div className="absolute right-0 top-12 z-50 w-[260px] rounded-2xl bg-stone-800/95 backdrop-blur-md border border-white/10 shadow-xl p-3">
+                          <div className="mb-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2">
+                            <p className="text-[11px] uppercase tracking-widest text-white/50 font-sans">Share photo</p>
+                            <p className="mt-1 text-sm text-white truncate">{selectedPhotoData?.alt ?? 'Wedding photo'}</p>
+                          </div>
+                          {canNativeShare && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); void handleNativeShare(); }}
+                              className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 hover:bg-white/10 transition-colors text-left text-sm text-white"
+                            >
+                              <Share2 className="w-4 h-4" />
+                              Share now
+                            </button>
+                          )}
                           <button
                             onClick={(e) => { e.stopPropagation(); handleCopyLink(); }}
-                            className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-white/10 transition-colors text-left text-sm text-white"
+                            className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 hover:bg-white/10 transition-colors text-left text-sm text-white"
                           >
-                            {linkCopied ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                            {linkCopied ? <Check className="w-4 h-4 text-green-400" /> : <Link2 className="w-4 h-4" />}
                             {linkCopied ? 'Copied!' : 'Copy link'}
                           </button>
+                          <div className="mt-2 grid grid-cols-2 gap-2">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleShareWhatsApp(); }}
+                              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-xs text-white text-left"
+                            >
+                              WhatsApp
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleShareFacebook(); }}
+                              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-xs text-white text-left"
+                            >
+                              Facebook
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleShareTelegram(); }}
+                              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-xs text-white text-left flex items-center gap-2"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                              Telegram
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleShareX(); }}
+                              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-xs text-white text-left"
+                            >
+                              X (Twitter)
+                            </button>
+                          </div>
                           <button
-                            onClick={(e) => { e.stopPropagation(); handleShareWhatsApp(); }}
-                            className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-white/10 transition-colors text-left text-sm text-white"
+                            onClick={(e) => { e.stopPropagation(); handleShareEmail(); }}
+                            className="mt-2 w-full px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 transition-colors text-xs text-white text-left flex items-center gap-2"
                           >
-                            <span className="text-lg">WhatsApp</span>
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleShareFacebook(); }}
-                            className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-white/10 transition-colors text-left text-sm text-white"
-                          >
-                            <span className="text-lg">Facebook</span>
+                            <Mail className="w-3.5 h-3.5" />
+                            Email
                           </button>
                         </div>
                       </>

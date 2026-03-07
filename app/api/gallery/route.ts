@@ -35,6 +35,30 @@ function extractStoragePath(value: string, bucketName: string) {
   }
 }
 
+async function resolveThumbnailUrl(
+  src: string,
+  bucketName: string,
+  adminClient: ReturnType<typeof createAdminClient>
+) {
+  const thumbnailPath = extractStoragePath(src, bucketName);
+  if (!thumbnailPath) return src;
+
+  // Bucket is private; thumbnails also need signed URLs.
+  if (!thumbnailPath.startsWith('thumbnails/')) {
+    return src;
+  }
+
+  const { data, error } = await adminClient.storage
+    .from(bucketName)
+    .createSignedUrl(thumbnailPath, 3600);
+
+  if (error || !data?.signedUrl) {
+    return src;
+  }
+
+  return data.signedUrl;
+}
+
 function escapeLike(value: string) {
   return value.replace(/[%_]/g, '\\$&');
 }
@@ -106,11 +130,7 @@ export async function GET(request: Request) {
 
     const images = await Promise.all(
       pageRows.map(async (image) => {
-        const thumbnailPath = extractStoragePath(image.src, bucketName);
-        const thumbnailUrl =
-          thumbnailPath && !isHttpUrl(image.src)
-            ? adminClient.storage.from(bucketName).getPublicUrl(thumbnailPath).data.publicUrl
-            : image.src;
+        const thumbnailUrl = await resolveThumbnailUrl(image.src, bucketName, adminClient);
 
         if (!includeFull) {
           return {
