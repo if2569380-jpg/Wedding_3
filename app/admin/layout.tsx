@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { createClient } from '@/lib/supabaseBrowser'
 import { useRouter } from 'next/navigation'
+import SessionRedirectGuard from '@/components/SessionRedirectGuard'
 
 const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
@@ -46,6 +47,7 @@ export default function AdminLayout({
 
   return (
     <div className="min-h-screen bg-[#f8f7f4]">
+      <SessionRedirectGuard />
       {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
         <div
