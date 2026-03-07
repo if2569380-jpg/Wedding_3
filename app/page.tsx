@@ -85,7 +85,7 @@ function Navigation() {
       <motion.nav
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2 }}
+        transition={{ duration: 0.5, delay: 0.05 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled 
             ? 'bg-white/85 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-stone-200/50' 
@@ -340,7 +340,7 @@ export default function Home() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: 0.45, delay: 0.1 }}
             className="text-[11px] sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 font-sans font-medium mb-5 sm:mb-6"
             style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
           >
@@ -350,7 +350,7 @@ export default function Home() {
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 0.5 }}
+            transition={{ duration: 0.55, delay: 0.15 }}
             className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-white leading-[1.08] tracking-tight"
             style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}
           >
@@ -361,7 +361,7 @@ export default function Home() {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.8 }}
+            transition={{ duration: 0.45, delay: 0.3 }}
             className="mt-6 sm:mt-8 text-sm sm:text-lg text-white/90 font-sans font-light tracking-wide max-w-xl mx-auto leading-relaxed"
             style={{ textShadow: '0 2px 15px rgba(0,0,0,0.5)' }}
           >
@@ -371,7 +371,7 @@ export default function Home() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.1 }}
+            transition={{ duration: 0.45, delay: 0.45 }}
             className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto"
           >
             <Link
@@ -408,7 +408,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 40 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.2 }}
-                viewport={{ once: false, margin: "-100px" }}
+                viewport={{ once: true, margin: "-100px" }}
                 className="order-2 md:order-1 mobile-motion-soft"
               >
                 <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
@@ -451,7 +451,7 @@ export default function Home() {
                 initial={{ opacity: 0, scale: 0.95, rotate: index % 2 === 0 ? -2 : 2 }}
                 whileInView={{ opacity: 1, scale: 1, rotate: index % 2 === 0 ? -1 : 1 }}
                 transition={{ duration: 1 }}
-                viewport={{ once: false }}
+                viewport={{ once: true }}
                 className="order-1 md:order-2 relative aspect-[4/5] sm:aspect-[3/4] md:aspect-auto md:h-[70vh] rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl border-8 sm:border-[12px] border-white mobile-motion-soft"
               >
                 <Image 

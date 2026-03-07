@@ -95,14 +95,17 @@ export function BackgroundMusic() {
     }
 
     const audio = new Audio(playlist[0].src);
+    audio.preload = 'metadata';
     audioRef.current = audio;
     lastLoadedIndexRef.current = 0;
     audio.volume = volume;
     
-    const onCanPlay = () => setReady(true);
     const onError = () => setReady(true);
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoadedMetadata = () => setDuration(audio.duration);
+    const onLoadedMetadata = () => {
+      setDuration(audio.duration);
+      setReady(true);
+    };
     const onEnded = () => {
       setCurrentTime(0);
       if (playlist.length === 1) {
@@ -113,17 +116,15 @@ export function BackgroundMusic() {
       }
     };
     
-    audio.addEventListener('canplaythrough', onCanPlay);
     audio.addEventListener('error', onError);
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoadedMetadata);
     audio.addEventListener('ended', onEnded);
     
-    const t = setTimeout(() => setReady(true), 2000);
+    const t = setTimeout(() => setReady(true), 1200);
     
     return () => {
       clearTimeout(t);
-      audio.removeEventListener('canplaythrough', onCanPlay);
       audio.removeEventListener('error', onError);
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoadedMetadata);
