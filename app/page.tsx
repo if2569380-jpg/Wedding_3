@@ -88,7 +88,7 @@ function Navigation() {
         transition={{ duration: 0.5, delay: 0.05 }}
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled 
-            ? 'bg-white/85 backdrop-blur-xl shadow-lg shadow-black/5 border-b border-stone-200/50' 
+            ? 'bg-white/92 backdrop-blur-xl shadow-xl shadow-black/10 border-b border-stone-300/70' 
             : 'bg-transparent'
         }`}
       >
@@ -100,15 +100,15 @@ function Navigation() {
                 <button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className={`relative text-xs tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
-                    scrolled ? 'text-stone-600' : 'text-white/90'
+                  className={`relative text-[11px] tracking-[0.14em] font-sans font-semibold transition-colors hover:text-rose-500 ${
+                    scrolled ? 'text-stone-700' : 'text-white/95'
                   } ${activeSection === item.id ? 'text-rose-500' : ''}`}
                 >
                   {item.label}
                   {activeSection === item.id && (
                     <motion.div
                       layoutId="activeNav"
-                      className={`absolute -bottom-1 left-0 right-0 h-0.5 ${scrolled ? 'bg-rose-500' : 'bg-white/70'}`}
+                      className={`absolute -bottom-1 left-0 right-0 h-[2px] ${scrolled ? 'bg-rose-500' : 'bg-white/80'}`}
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -119,7 +119,7 @@ function Navigation() {
             {/* Logo */}
             <Link href="/" className="flex-shrink min-w-0">
               <motion.h1 
-                className={`text-xl sm:text-3xl truncate font-light italic tracking-normal transition-colors ${
+                className={`text-xl sm:text-3xl truncate font-medium italic tracking-normal transition-colors ${
                   scrolled ? 'text-stone-800' : 'text-white'
                 }`} 
                 style={{ 
@@ -138,15 +138,15 @@ function Navigation() {
                 <button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className={`relative text-xs tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
-                    scrolled ? 'text-stone-600' : 'text-white/90'
+                  className={`relative text-[11px] tracking-[0.14em] font-sans font-semibold transition-colors hover:text-rose-500 ${
+                    scrolled ? 'text-stone-700' : 'text-white/95'
                   } ${activeSection === item.id ? 'text-rose-500' : ''}`}
                 >
                   {item.label}
                   {activeSection === item.id && (
                     <motion.div
                       layoutId="activeNav"
-                      className={`absolute -bottom-1 left-0 right-0 h-0.5 ${scrolled ? 'bg-rose-500' : 'bg-white/70'}`}
+                      className={`absolute -bottom-1 left-0 right-0 h-[2px] ${scrolled ? 'bg-rose-500' : 'bg-white/80'}`}
                       transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -161,8 +161,8 @@ function Navigation() {
               aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
               aria-expanded={isOpen}
               aria-controls="mobile-nav-menu"
-              className={`md:hidden p-2.5 rounded-full border border-transparent min-h-11 min-w-11 transition-colors ${
-                scrolled ? 'text-stone-800' : 'text-white'
+              className={`md:hidden p-2.5 rounded-full border min-h-11 min-w-11 transition-colors ${
+                scrolled ? 'text-stone-800 border-stone-300 bg-white/80' : 'text-white border-white/45 bg-black/15'
               }`}
             >
               {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -180,15 +180,15 @@ function Navigation() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-xl pt-20 px-6 md:hidden"
+            className="fixed inset-0 z-40 bg-white/98 backdrop-blur-xl pt-20 px-6 md:hidden"
           >
             <div className="flex flex-col items-center gap-3">
               {navItems.map((item) => (
                 <button
                   key={item.label}
                   onClick={() => scrollToSection(item.href)}
-                  className={`w-full max-w-xs py-3 text-sm tracking-[0.2em] font-sans font-medium transition-colors hover:text-rose-500 ${
-                    activeSection === item.id ? 'text-rose-500' : 'text-stone-600'
+                  className={`w-full max-w-xs py-3.5 text-sm tracking-[0.14em] font-sans font-semibold transition-colors border-b border-stone-200/80 hover:text-rose-500 ${
+                    activeSection === item.id ? 'text-rose-500' : 'text-stone-700'
                   }`}
                 >
                   {item.label}
@@ -210,7 +210,7 @@ const WEDDING_SECTIONS = [
     description: "It all started with a simple hello. From that moment, we knew our lives would never be the same. Every conversation felt like coming home.",
     color: "bg-[#fdfcf8]",
     textColor: "text-stone-800",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/e2f0393f-98af-4204-bbfb-c35466695a02-1772830664406.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvZTJmMDM5M2YtOThhZi00MjA0LWJiZmItYzM1NDY2Njk1YTAyLTE3NzI4MzA2NjQ0MDYuamZpZiIsImlhdCI6MTc3Mjg3OTg5NSwiZXhwIjoxNzcyODgzNDk1fQ.lQ0xw6JTfox4lvCinlFzGdsRUx2xU8nnag0zTT2wUxk",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/e2f0393f-98af-4204-bbfb-c35466695a02-1772830664406.jfif",
     icon: <Heart className="w-6 h-6 text-rose-400" />,
   },
   {
@@ -220,7 +220,7 @@ const WEDDING_SECTIONS = [
     description: "Under the starlit sky, with the sound of waves crashing against the shore, he asked the question that would change our forever. She said yes.",
     color: "bg-[#f5f2ed]",
     textColor: "text-stone-800",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/cfc8fac2-ad0a-4e8d-a9d1-7d934c682fb1-1772828895513.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvY2ZjOGZhYzItYWQwYS00ZThkLWE5ZDEtN2Q5MzRjNjgyZmIxLTE3NzI4Mjg4OTU1MTMuamZpZiIsImlhdCI6MTc3Mjg3NTc1MywiZXhwIjoxNzcyODc5MzUzfQ.9GWwBlDKMMqjHRCnIQGKmS0KrO2ZSf2OWmuR25uX7to",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/cfc8fac2-ad0a-4e8d-a9d1-7d934c682fb1-1772828895513.jfif",
     icon: <Sparkles className="w-6 h-6 text-amber-400" />,
   },
   {
@@ -230,7 +230,7 @@ const WEDDING_SECTIONS = [
     description: "Surrounded by our dearest family and friends, we promised to love and cherish each other for all the days of our lives. A day filled with joy and laughter.",
     color: "bg-[#ece8e1]",
     textColor: "text-stone-800",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/82ebe6d4-d97a-44c1-b1cd-b6713c33b9d0-1772830623681.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvODJlYmU2ZDQtZDk3YS00NGMxLWIxY2QtYjY3MTNjMzNiOWQwLTE3NzI4MzA2MjM2ODEuamZpZiIsImlhdCI6MTc3Mjg3NTc1MiwiZXhwIjoxNzcyODc5MzUyfQ.m6_okXkME_HL7kkh3y6Kv8tPKOPmLizzZ32TKS2SSp8",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/82ebe6d4-d97a-44c1-b1cd-b6713c33b9d0-1772830623681.jfif",
     icon: <Calendar className="w-6 h-6 text-stone-500" />,
   },
   {
@@ -240,7 +240,7 @@ const WEDDING_SECTIONS = [
     description: "The music played, the wine flowed, and we danced our first dance as husband and wife. A celebration of a love that will last an eternity.",
     color: "bg-[#5a5a40]",
     textColor: "text-stone-100",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/1da8e16b-3082-4c77-967d-82a0ee36e8b2-1772828877550.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvMWRhOGUxNmItMzA4Mi00Yzc3LTk2N2QtODJhMGVlMzZlOGIyLTE3NzI4Mjg4Nzc1NTAuamZpZiIsImlhdCI6MTc3Mjg3NTc1MywiZXhwIjoxNzcyODc5MzUzfQ.zxx5u33Yl0Hrkq_HpbphKb97ycWzpLpTtrDUPnah9TU",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/1da8e16b-3082-4c77-967d-82a0ee36e8b2-1772828877550.jfif",
     icon: <Music className="w-6 h-6 text-stone-200" />,
   },
   {
@@ -251,7 +251,7 @@ const WEDDING_SECTIONS = [
     description: "Counting down to the next November 1 celebration of our marriage and memories together.",
     color: "bg-[#4a4a30]",
     textColor: "text-stone-100",
-    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/59181363-2d7c-427f-959c-509a4dd4d0d1-1772828921774.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvNTkxODEzNjMtMmQ3Yy00MjdmLTk1OWMtNTA5YTRkZDRkMGQxLTE3NzI4Mjg5MjE3NzQuamZpZiIsImlhdCI6MTc3Mjg3NTc1MywiZXhwIjoxNzcyODc5MzUzfQ.RtOi-7YQMkXC5Lk0_-FetYk-ghEdYmUzGKrd5kFJco4",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/gallery/full/59181363-2d7c-427f-959c-509a4dd4d0d1-1772828921774.jfif",
     icon: <Timer className="w-6 h-6 text-rose-300" />,
   }
 ];
@@ -341,7 +341,7 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1 }}
-            className="text-[11px] sm:text-sm uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 font-sans font-medium mb-5 sm:mb-6"
+            className="text-xs sm:text-sm uppercase tracking-[0.14em] sm:tracking-[0.2em] text-white/90 font-sans font-semibold mb-5 sm:mb-6"
             style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
           >
             Laboni & Adnan Arif
@@ -355,14 +355,14 @@ export default function Home() {
             style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}
           >
             Turning Your Wedding Dreams
-            <span className="block italic font-light mt-2">Into Ultimate Reality</span>
+            <span className="block italic font-normal mt-2">Into Ultimate Reality</span>
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.3 }}
-            className="mt-6 sm:mt-8 text-sm sm:text-lg text-white/90 font-sans font-light tracking-wide max-w-xl mx-auto leading-relaxed"
+            className="mt-6 sm:mt-8 text-sm sm:text-lg text-white/95 font-sans font-normal tracking-[0.01em] max-w-xl mx-auto leading-relaxed"
             style={{ textShadow: '0 2px 15px rgba(0,0,0,0.5)' }}
           >
             Crafting every detail to shape your perfect wedding day with love and elegance.
@@ -376,13 +376,13 @@ export default function Home() {
           >
             <Link
               href="#about"
-              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white text-stone-900 text-xs sm:text-sm tracking-[0.12em] sm:tracking-[0.15em] font-sans font-semibold rounded-full hover:bg-stone-100 hover:scale-105 transition-all duration-300 shadow-xl"
+              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white text-stone-900 text-sm tracking-[0.08em] font-sans font-bold rounded-xl border border-white/80 hover:bg-stone-100 hover:scale-[1.03] transition-all duration-300 shadow-[0_12px_30px_rgba(0,0,0,0.28)]"
             >
               EXPLORE OUR STORY
             </Link>
             <Link
               href="/gallery"
-              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white/10 backdrop-blur-sm border border-white/30 text-white text-xs sm:text-sm tracking-[0.12em] sm:tracking-[0.15em] font-sans font-medium rounded-full hover:bg-white/20 hover:scale-105 transition-all duration-300"
+              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white/20 backdrop-blur-md border border-white/60 text-white text-sm tracking-[0.08em] font-sans font-semibold rounded-xl hover:bg-white/28 hover:scale-[1.03] transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.2)]"
             >
               VIEW GALLERY
             </Link>
@@ -412,14 +412,14 @@ export default function Home() {
                 className="order-2 md:order-1 mobile-motion-soft"
               >
                 <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
-                  <div className="w-10 h-10 rounded-full bg-stone-200/50 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-stone-200/80 border border-stone-300/70 flex items-center justify-center">
                     {section.icon}
                   </div>
-                  <span className="text-xs sm:text-sm uppercase tracking-[0.16em] sm:tracking-widest font-sans font-bold opacity-60">
+                  <span className="text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.14em] font-sans font-semibold opacity-75">
                     {section.subtitle}
                   </span>
                 </div>
-                <h2 className="text-4xl sm:text-5xl md:text-7xl font-serif font-light mb-5 sm:mb-8 leading-tight">
+                <h2 className="text-4xl sm:text-5xl md:text-7xl font-serif font-normal mb-5 sm:mb-8 leading-tight">
                   {section.title}
                 </h2>
                 <p className="text-base sm:text-lg md:text-xl font-serif leading-relaxed opacity-80 max-w-md">
@@ -431,15 +431,15 @@ export default function Home() {
                 ) : (
                   <div className="mt-8 sm:mt-12 flex flex-wrap items-center gap-4 sm:gap-6">
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-tighter font-sans opacity-40">Location</span>
-                      <span className="text-sm font-sans flex items-center gap-1">
+                      <span className="text-[10px] uppercase tracking-[0.08em] font-sans opacity-55">Location</span>
+                      <span className="text-sm font-sans font-medium flex items-center gap-1">
                         <MapPin className="w-3 h-3" /> Tuscany, Italy
                       </span>
                     </div>
                     <div className="w-px h-8 bg-stone-300/30" />
                     <div className="flex flex-col">
-                      <span className="text-[10px] uppercase tracking-tighter font-sans opacity-40">Photographer</span>
-                      <span className="text-sm font-sans flex items-center gap-1">
+                      <span className="text-[10px] uppercase tracking-[0.08em] font-sans opacity-55">Photographer</span>
+                      <span className="text-sm font-sans font-medium flex items-center gap-1">
                         <Camera className="w-3 h-3" /> Elena Rossi
                       </span>
                     </div>
@@ -489,7 +489,7 @@ export default function Home() {
             className="w-20 sm:w-24 h-px bg-gradient-to-r from-transparent via-rose-400/60 to-transparent mx-auto mb-9 sm:mb-12"
           />
           
-          <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-light mb-4 sm:mb-6 tracking-tight">
+          <h2 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-normal mb-4 sm:mb-6 tracking-tight">
             To be continued
             <span className="text-rose-400">...</span>
           </h2>
@@ -499,7 +499,7 @@ export default function Home() {
           </p>
           
           {/* Names */}
-          <p className="text-xl sm:text-3xl font-light italic mb-9 sm:mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
+          <p className="text-xl sm:text-3xl font-medium italic mb-9 sm:mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
             Laboni & Adnan Arif
           </p>
           
@@ -515,14 +515,14 @@ export default function Home() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 border border-stone-600 rounded-full font-sans text-xs sm:text-sm uppercase tracking-[0.14em] sm:tracking-[0.2em] hover:bg-white hover:text-stone-900 hover:border-white transition-all duration-500"
+              className="w-full sm:w-auto px-6 sm:px-8 py-3.5 sm:py-4 border border-stone-500 rounded-xl font-sans text-sm uppercase tracking-[0.08em] font-semibold hover:bg-white hover:text-stone-900 hover:border-white transition-all duration-500"
             >
               Replay Story
             </motion.button>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
               <Link
                 href="/gallery"
-                className="inline-flex w-full sm:w-auto justify-center items-center gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-rose-500 to-rose-600 rounded-full font-sans text-xs sm:text-sm uppercase tracking-[0.14em] sm:tracking-[0.2em] hover:from-rose-400 hover:to-rose-500 transition-all duration-500 shadow-lg shadow-rose-500/25"
+                className="inline-flex w-full sm:w-auto justify-center items-center gap-3 px-6 sm:px-8 py-3.5 sm:py-4 bg-gradient-to-r from-rose-500 to-rose-600 rounded-xl font-sans text-sm uppercase tracking-[0.08em] font-semibold hover:from-rose-400 hover:to-rose-500 transition-all duration-500 shadow-[0_10px_30px_rgba(225,29,72,0.35)]"
               >
                 <Images className="w-5 h-5" />
                 View Gallery
