@@ -3,20 +3,27 @@
 import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { Heart, Calendar, MapPin, Camera, Music, Timer, ChevronDown, Images, Menu, X } from 'lucide-react';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import ShiftingCountdown from '@/components/ui/countdown-timer';
 import GuestMusic from '@/components/GuestMusic';
-import PhotoCollageSection from '@/components/PhotoCollageSection';
+import PhotoCollageSection, { type PolaroidItem } from '@/components/PhotoCollageSection';
 import { HERO_IMAGE_URL } from '@/lib/heroImage';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { FALLBACK_STORY_CARDS, type AccentToken, type BackgroundToken, type IconToken, type SectionType, type TextToken } from '@/lib/landingContent';
 
 const SUPABASE_PUBLIC_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const GALLERY_BUCKET = process.env.NEXT_PUBLIC_SUPABASE_GALLERY_BUCKET || 'gallery';
+const LANDING_BUCKET = process.env.NEXT_PUBLIC_SUPABASE_LANDING_BUCKET || 'landing-public';
 
 function getPublicStorageUrl(path: string) {
   if (!SUPABASE_PUBLIC_URL || !path) return '';
   return `${SUPABASE_PUBLIC_URL}/storage/v1/object/public/${GALLERY_BUCKET}/${path}`;
+}
+
+function getLandingPublicStorageUrl(path: string) {
+  if (!SUPABASE_PUBLIC_URL || !path) return '';
+  return `${SUPABASE_PUBLIC_URL}/storage/v1/object/public/${LANDING_BUCKET}/${path}`;
 }
 
 function FloralDivider() {
@@ -211,59 +218,81 @@ function Navigation() {
   );
 }
 
-const WEDDING_SECTIONS = [
-  {
-    id: 1,
-    title: "The Beginning",
-    subtitle: "How we met",
-    description: "It all started with a simple hello. From that moment, we knew our lives would never be the same. Every conversation felt like coming home.",
-    color: "bg-[#fdfcf8]",
-    textColor: "text-stone-800",
-    imagePath: "full/e2f0393f-98af-4204-bbfb-c35466695a02-1772830664406.jfif",
-    icon: <Heart className="w-6 h-6 text-rose-400" />,
-  },
-  {
-    id: 2,
-    title: "The Proposal",
-    subtitle: "A moment in time",
-    description: "Under the starlit sky, with the sound of waves crashing against the shore, he asked the question that would change our forever. She said yes.",
-    color: "bg-[#f5f2ed]",
-    textColor: "text-stone-800",
-    imagePath: "full/cfc8fac2-ad0a-4e8d-a9d1-7d934c682fb1-1772828895513.jfif",
-    icon: <Sparkles className="w-6 h-6 text-amber-400" />,
-  },
-  {
-    id: 3,
-    title: "The Big Day",
-    subtitle: "June 15, 2025",
-    description: "Surrounded by our dearest family and friends, we promised to love and cherish each other for all the days of our lives. A day filled with joy and laughter.",
-    color: "bg-[#ece8e1]",
-    textColor: "text-stone-800",
-    imagePath: "full/82ebe6d4-d97a-44c1-b1cd-b6713c33b9d0-1772830623681.jfif",
-    icon: <Calendar className="w-6 h-6 text-stone-500" />,
-  },
-  {
-    id: 4,
-    title: "The Celebration",
-    subtitle: "Dancing through the night",
-    description: "The music played, the wine flowed, and we danced our first dance as husband and wife. A celebration of a love that will last an eternity.",
-    color: "bg-[#5a5a40]",
-    textColor: "text-stone-100",
-    imagePath: "full/1da8e16b-3082-4c77-967d-82a0ee36e8b2-1772828877550.jfif",
-    icon: <Music className="w-6 h-6 text-stone-200" />,
-  },
-  {
-    id: 5,
-    type: 'countdown',
-    title: "Our Anniversary",
-    subtitle: "Married on November 1, 2024",
-    description: "Counting down to the next November 1 celebration of our marriage and memories together.",
-    color: "bg-[#4a4a30]",
-    textColor: "text-stone-100",
-    imagePath: "full/59181363-2d7c-427f-959c-509a4dd4d0d1-1772828921774.jfif",
-    icon: <Timer className="w-6 h-6 text-rose-300" />,
-  }
-];
+interface LandingStorySection {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  image_path: string;
+  image_alt: string;
+  image_url?: string;
+  section_type: SectionType;
+  countdown_target: string | null;
+  icon_token: IconToken;
+  background_token: BackgroundToken;
+  text_token: TextToken;
+  accent_token: AccentToken;
+  order_index: number;
+  is_active: boolean;
+}
+
+interface LandingCollageSection {
+  id: string;
+  caption: string;
+  image_path: string;
+  image_alt: string;
+  image_url?: string;
+  order_index: number;
+  is_active: boolean;
+}
+
+const FALLBACK_WEDDING_SECTIONS: LandingStorySection[] = FALLBACK_STORY_CARDS.map((item, index) => ({
+  id: `fallback-story-${index + 1}`,
+  title: item.title,
+  subtitle: item.subtitle,
+  description: item.description,
+  image_path: item.image_path,
+  image_alt: item.image_alt,
+  section_type: item.section_type,
+  countdown_target: item.countdown_target,
+  icon_token: item.icon_token,
+  background_token: item.background_token,
+  text_token: item.text_token,
+  accent_token: item.accent_token,
+  order_index: index,
+  is_active: true,
+}));
+
+const STORY_BACKGROUND_CLASS_MAP: Record<BackgroundToken, string> = {
+  ivory: 'bg-[#fdfcf8]',
+  sand: 'bg-[#f5f2ed]',
+  taupe: 'bg-[#ece8e1]',
+  olive: 'bg-[#5a5a40]',
+  charcoal: 'bg-[#3f3f2f]',
+};
+
+const STORY_TEXT_CLASS_MAP: Record<TextToken, string> = {
+  stone_dark: 'text-stone-800',
+  stone_light: 'text-stone-100',
+};
+
+const ACCENT_ICON_CLASS_MAP: Record<AccentToken, string> = {
+  rose: 'text-rose-300',
+  amber: 'text-amber-300',
+  stone: 'text-stone-300',
+  blue: 'text-blue-300',
+  emerald: 'text-emerald-300',
+};
+
+function renderStoryIcon(token: IconToken, className: string) {
+  if (token === 'heart') return <Heart className={className} />;
+  if (token === 'calendar') return <Calendar className={className} />;
+  if (token === 'music') return <Music className={className} />;
+  if (token === 'timer') return <Timer className={className} />;
+  if (token === 'camera') return <Camera className={className} />;
+  if (token === 'map_pin') return <MapPin className={className} />;
+  return <Sparkles className={className} />;
+}
 
 const STORY_SECTION_ANCHORS: Record<number, string> = {
   0: 'about',
@@ -311,9 +340,38 @@ export default function Home() {
   const scale = useTransform(scrollY, [0, 500], [1, isMobile ? 1.04 : 1.1]);
   const countdownTargetDate = getNextNovemberFirstTarget();
   const [landingSignedImages, setLandingSignedImages] = useState<Record<string, string>>({});
+  const [storySections, setStorySections] = useState<LandingStorySection[]>([]);
+  const [collageSections, setCollageSections] = useState<LandingCollageSection[]>([]);
 
   useEffect(() => {
     let isMounted = true;
+
+    const loadLandingContent = async () => {
+      try {
+        const response = await fetch('/api/landing-content');
+        if (!response.ok) return;
+
+        const payload = (await response.json()) as {
+          storyCards?: LandingStorySection[];
+          collageItems?: LandingCollageSection[];
+        };
+
+        if (!isMounted) return;
+
+        const sortedStory = (payload.storyCards || [])
+          .filter((item) => item.is_active !== false)
+          .sort((a, b) => a.order_index - b.order_index);
+
+        const sortedCollage = (payload.collageItems || [])
+          .filter((item) => item.is_active !== false)
+          .sort((a, b) => a.order_index - b.order_index);
+
+        setStorySections(sortedStory);
+        setCollageSections(sortedCollage);
+      } catch {
+        // Keep static fallback content.
+      }
+    };
 
     const loadLandingImages = async () => {
       try {
@@ -329,12 +387,36 @@ export default function Home() {
       }
     };
 
+    loadLandingContent();
     loadLandingImages();
 
     return () => {
       isMounted = false;
     };
   }, []);
+
+  const resolvedStorySections = useMemo(() => {
+    const source = storySections.length > 0 ? storySections : FALLBACK_WEDDING_SECTIONS;
+    return source
+      .filter((section) => section.is_active !== false)
+      .sort((a, b) => a.order_index - b.order_index);
+  }, [storySections]);
+
+  const resolvedCollageItems = useMemo<PolaroidItem[] | undefined>(() => {
+    if (collageSections.length === 0) return undefined;
+
+    const items = collageSections
+      .filter((item) => item.is_active !== false)
+      .sort((a, b) => a.order_index - b.order_index)
+      .map((item, index) => ({
+        id: item.id || `collage-${index + 1}`,
+        src: item.image_url || getLandingPublicStorageUrl(item.image_path) || HERO_IMAGE_URL,
+        caption: item.caption,
+        alt: item.image_alt || item.caption,
+      }));
+
+    return items.length > 0 ? items : undefined;
+  }, [collageSections]);
 
   return (
     <main className="relative antialiased selection:bg-rose-100 selection:text-rose-900">
@@ -428,11 +510,13 @@ export default function Home() {
 
       {/* Overlapping Album Sections */}
       <div className="relative">
-        {WEDDING_SECTIONS.map((section, index) => (
+        {resolvedStorySections.map((section, index) => (
           <section
-            key={section.id || section.title}
+            key={section.id}
             id={STORY_SECTION_ANCHORS[index]}
-            className={`md:sticky md:top-0 scroll-mt-24 min-h-[88svh] md:h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-12 ${section.color} ${section.textColor} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}
+            className={`md:sticky md:top-0 scroll-mt-24 min-h-[88svh] md:h-screen w-full flex items-center justify-center p-4 sm:p-6 md:p-12 ${
+              STORY_BACKGROUND_CLASS_MAP[section.background_token] || STORY_BACKGROUND_CLASS_MAP.ivory
+            } ${STORY_TEXT_CLASS_MAP[section.text_token] || STORY_TEXT_CLASS_MAP.stone_dark} shadow-[0_-20px_50px_rgba(0,0,0,0.05)]`}
             style={{ 
               zIndex: index + 1,
             }}
@@ -447,7 +531,7 @@ export default function Home() {
               >
                 <div className="flex items-center gap-3 sm:gap-4 mb-5 sm:mb-6">
                   <div className="w-10 h-10 rounded-full bg-stone-200/80 border border-stone-300/70 flex items-center justify-center">
-                    {section.icon}
+                    {renderStoryIcon(section.icon_token, `w-6 h-6 ${ACCENT_ICON_CLASS_MAP[section.accent_token]}`)}
                   </div>
                   <span className="text-xs sm:text-sm uppercase tracking-[0.1em] sm:tracking-[0.14em] font-sans font-semibold opacity-75">
                     {section.subtitle}
@@ -460,8 +544,8 @@ export default function Home() {
                   {section.description}
                 </p>
                 
-                {section.type === 'countdown' ? (
-                  <ShiftingCountdown targetDate={countdownTargetDate} />
+                {section.section_type === 'countdown' ? (
+                  <ShiftingCountdown targetDate={section.countdown_target || countdownTargetDate} />
                 ) : (
                   <div className="mt-8 sm:mt-12 flex flex-wrap items-center gap-4 sm:gap-6">
                     <div className="flex flex-col">
@@ -490,12 +574,14 @@ export default function Home() {
               >
                 <Image 
                   src={
-                    landingSignedImages[section.imagePath]
-                    || getPublicStorageUrl(section.imagePath)
-                    || getPublicStorageUrl(section.imagePath.replace(/^full\//, 'thumbnails/'))
+                    section.image_url
+                    || landingSignedImages[section.image_path]
+                    || getLandingPublicStorageUrl(section.image_path)
+                    || getPublicStorageUrl(section.image_path)
+                    || getPublicStorageUrl(section.image_path.replace(/^full\//, 'thumbnails/'))
                     || HERO_IMAGE_URL
                   }
-                  alt={section.title} 
+                  alt={section.image_alt || section.title} 
                   fill 
                   className="object-cover"
                   referrerPolicy="no-referrer"
@@ -508,7 +594,7 @@ export default function Home() {
       </div>
 
       {/* Photo Collage Section */}
-      <PhotoCollageSection />
+      <PhotoCollageSection items={resolvedCollageItems} />
 
       {/* Final Section */}
       <section id="contact" className="scroll-mt-24 min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#1a1a1a] via-[#252525] to-[#1a1a1a] text-white px-4 sm:px-8 py-12 sm:py-10 text-center relative z-50 overflow-hidden">

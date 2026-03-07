@@ -53,6 +53,8 @@ Required by current code:
 Optional:
 
 - `SUPABASE_GALLERY_BUCKET` - defaults to `gallery`
+- `SUPABASE_LANDING_BUCKET` - defaults to `landing-public`
+- `NEXT_PUBLIC_SUPABASE_LANDING_BUCKET` - defaults to `landing-public` (client-side fallback URL building)
 
 Currently not used by this codebase:
 
@@ -72,6 +74,12 @@ Currently not used by this codebase:
    - `supabase/migrations/002_create_gallery_settings.sql`
    - `supabase/migrations/003_create_songs.sql`
    - `supabase/migrations/004_add_source_type_to_songs.sql`
+   - `supabase/migrations/005_allow_custom_gallery_categories.sql`
+   - `supabase/migrations/006_create_family_members.sql`
+   - `supabase/migrations/007_public_thumbnails_private_full.sql`
+   - `supabase/migrations/008_create_gallery_analytics_events.sql`
+   - `supabase/migrations/009_public_landing_full_images.sql`
+   - `supabase/migrations/010_create_landing_content_schema.sql`
 3. In Supabase Auth, create users manually (email/password), since there is no sign-up page in this app.
 
 ## Run Locally
@@ -94,6 +102,7 @@ Currently not used by this codebase:
 - `/admin` - private admin dashboard (auth required)
 - `/admin/upload` - upload photos
 - `/admin/photos` - manage photos
+- `/admin/landing` - manage landing story + polaroid collage
 - `/admin/music` - manage playlist
 - `/admin/settings` - gallery feature/settings controls
 
@@ -103,7 +112,13 @@ Currently not used by this codebase:
 - `GET /api/gallery/full-url?id=<id>` - get signed full-resolution URL for a single image
 - `GET /api/gallery/settings` - fetch gallery settings
 - `POST /api/gallery/settings` - update settings (auth required)
+- `GET /api/landing-content` - fetch public landing story + collage content
+- `GET /api/landing-images` - compatibility endpoint for signed legacy landing images / new public landing content
 - `GET /api/admin/gallery-stats` - lightweight dashboard stats (auth required)
+- `GET /api/admin/landing-content` - fetch editable landing story + collage content (auth required)
+- `PUT /api/admin/landing-content` - upsert full landing story + collage snapshot (auth required)
+- `POST /api/admin/landing-content/upload` - upload landing/collage image to public landing bucket (auth required)
+- `POST /api/admin/landing-content/bootstrap` - one-time bootstrap from existing gallery images (auth required)
 - `POST /api/admin/upload` - upload image + insert metadata (auth required)
 - `PATCH /api/admin/photos` - edit photo metadata (auth required)
 - `DELETE /api/admin/photos?id=<id>` - delete photo + storage files (auth required)
@@ -127,6 +142,8 @@ Currently not used by this codebase:
 - For Vercel/Netlify, set all required environment variables in dashboard settings.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` server-only and never expose it in client code.
 - If you switch to a different Supabase project, ensure image host settings in `next.config.ts` still match the new storage domain.
+- Keep `gallery` bucket private for protected gallery flow.
+- Use `landing-public` bucket for landing page/public collage assets managed from admin.
 
 ## Security Notes
 
