@@ -122,7 +122,7 @@ function PhotoCard({ photo, index, viewMode, isMobile, showWatermark, watermarkT
           viewMode === 'grid' ? 'h-full' : 'h-auto'
         }`}
         referrerPolicy="no-referrer"
-        sizes={viewMode === 'grid' ? '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw' : '(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw'}
+        sizes={viewMode === 'grid' ? '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw' : '(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw'}
       />
 
       {showWatermark && (
@@ -866,17 +866,18 @@ export default function GalleryPage() {
 
       {/* Category Filter & Search */}
       {settings.show_category_filter && (
-        <div className="safe-container px-4 sm:px-6 lg:px-8 py-5 sm:py-8">
-          {/* Categories, Search and Photo Count in one row */}
-          <div className="mobile-stack-gap sm:block">
-            <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center gap-2 sm:gap-3 overflow-x-auto pb-1 px-0.5 scrollbar-hide">
+        <div className="safe-container px-4 sm:px-6 lg:px-8 py-5 sm:py-6 md:py-8">
+          {/* Responsive Layout: Mobile stack, Tablet/Desktop row */}
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 lg:gap-6">
+            {/* Categories - Horizontal scroll on mobile, flex wrap on larger screens */}
+            <div className="flex flex-nowrap sm:flex-wrap items-center justify-start sm:justify-center lg:justify-start gap-2 sm:gap-3 overflow-x-auto pb-1 px-0.5 scrollbar-hide lg:overflow-visible lg:pb-0 lg:flex-1">
               {CATEGORIES.map((category) => (
                 <button
                   key={category}
                   onClick={() => setSelectedCategory(category)}
-                  className={`control-pill whitespace-nowrap font-sans text-xs sm:text-sm uppercase tracking-[0.08em] sm:tracking-wider transition-all duration-300 ${
+                  className={`control-pill whitespace-nowrap font-sans text-xs sm:text-sm md:text-base uppercase tracking-[0.08em] sm:tracking-wider transition-all duration-300 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 rounded-full ${
                     selectedCategory === category
-                      ? 'bg-stone-800 text-white'
+                      ? 'bg-stone-800 text-white shadow-md'
                       : 'bg-stone-200 text-stone-600 hover:bg-stone-300'
                   }`}
                 >
@@ -885,59 +886,63 @@ export default function GalleryPage() {
               ))}
             </div>
             
-            {/* Search Input with Suggestions */}
-            <div className="relative w-full sm:w-60 mx-auto">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone-400 z-10" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  setShowSuggestions(true);
-                }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-full border border-stone-200 bg-white text-sm focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all"
-              />
+            {/* Right side: Search + Photo Count */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 lg:gap-6">
+              {/* Search Input with Suggestions */}
+              <div className="relative w-full sm:w-56 md:w-64 lg:w-72">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-stone-400 z-10" />
+                <input
+                  type="text"
+                  placeholder="Search photos..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSuggestions(true);
+                  }}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className="w-full pl-9 md:pl-10 pr-4 py-2.5 md:py-3 rounded-full border border-stone-200 bg-white text-sm md:text-base focus:border-stone-400 focus:ring-2 focus:ring-stone-100 outline-none transition-all shadow-sm"
+                />
+                
+                {/* Suggestions Dropdown */}
+                {showSuggestions && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 py-2 z-50 w-full min-w-0 max-h-56 overflow-y-auto">
+                    {suggestions.map((suggestion, index) => (
+                      <button
+                        key={index}
+                        onClick={() => {
+                          setSearchQuery(suggestion);
+                          setShowSuggestions(false);
+                        }}
+                        className="w-full px-4 py-2.5 text-left text-sm md:text-base text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-2"
+                      >
+                        <Search className="w-3 h-3 md:w-4 md:h-4 text-stone-400" />
+                        <span className="truncate">{suggestion}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               
-              {/* Suggestions Dropdown */}
-              {showSuggestions && suggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-xl shadow-lg border border-stone-100 py-2 z-50 w-full min-w-0 max-h-56 overflow-y-auto">
-                  {suggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => {
-                        setSearchQuery(suggestion);
-                        setShowSuggestions(false);
-                      }}
-                      className="w-full px-4 py-2 text-left text-sm text-stone-700 hover:bg-stone-50 transition-colors flex items-center gap-2"
-                    >
-                      <Search className="w-3 h-3 text-stone-400" />
-                      <span className="truncate">{suggestion}</span>
-                    </button>
-                  ))}
-                </div>
+              {/* Photo Count */}
+              {settings.show_photo_count && (
+                <span className="text-stone-500 font-sans text-xs sm:text-sm md:text-base text-center sm:text-right whitespace-nowrap">
+                  {displayedCount} of {totalCount} photo{totalCount !== 1 ? 's' : ''}
+                </span>
               )}
             </div>
-            
-            {settings.show_photo_count && (
-              <span className="text-stone-500 font-sans text-xs sm:text-sm text-center block">
-                • {displayedCount} of {totalCount} photo{totalCount !== 1 ? 's' : ''}
-              </span>
-            )}
           </div>
         </div>
       )}
 
       {/* Photo Grid */}
-      <div className="safe-container px-4 sm:px-6 lg:px-8 pb-14 sm:pb-16">
+      <div className="safe-container px-3 sm:px-6 lg:px-8 xl:px-10 pb-14 sm:pb-16 md:pb-20">
         {loading ? (
-          <div className={
-            viewMode === 'masonry'
-              ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 space-y-3 sm:space-y-4'
-              : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4'
-          }>
+            <div className={
+              viewMode === 'masonry'
+                ? 'columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-3 sm:gap-4 md:gap-5 space-y-3 sm:space-y-4 md:space-y-5'
+                : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5'
+            }>
             {Array.from({ length: 12 }).map((_, i) => (
               <PhotoSkeleton key={i} viewMode={viewMode} />
             ))}
@@ -962,8 +967,8 @@ export default function GalleryPage() {
               layout
               className={
                 viewMode === 'masonry'
-                  ? 'columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-3 sm:gap-4 space-y-3 sm:space-y-4'
-                  : 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4'
+                  ? 'columns-1 sm:columns-2 md:columns-3 lg:columns-4 xl:columns-5 gap-3 sm:gap-4 md:gap-5 space-y-3 sm:space-y-4 md:space-y-5'
+                  : 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 md:gap-5'
               }
             >
               <AnimatePresence mode="popLayout">
@@ -1012,67 +1017,67 @@ export default function GalleryPage() {
             onClick={closeLightbox}
           >
             {/* Top Toolbar */}
-            <div className="absolute top-0 left-0 right-0 p-3 sm:p-4 flex flex-col gap-2 sm:gap-3 z-50 bg-gradient-to-b from-black/60 via-black/20 to-transparent">
+            <div className="absolute top-0 left-0 right-0 p-2 sm:p-3 md:p-4 flex flex-col gap-2 sm:gap-3 z-50 bg-gradient-to-b from-black/70 via-black/30 to-transparent">
               <div className="flex items-center justify-between gap-2">
-                <span className="text-white font-sans text-sm">
+                <span className="text-white font-sans text-xs sm:text-sm md:text-base">
                   {selectedPhoto + 1} / {filteredPhotos.length}
                 </span>
                 {isSlideshow && (
-                  <span className="text-rose-400 text-xs uppercase tracking-widest font-sans animate-pulse">
+                  <span className="text-rose-400 text-[10px] sm:text-xs uppercase tracking-widest font-sans animate-pulse">
                     Slideshow
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1">
+              <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3 overflow-x-auto scrollbar-hide pb-1">
                 {/* Zoom Controls */}
                 {settings.allow_zoom && (
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleZoomOut(); }}
-                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
                       title="Zoom Out (-)"
                     >
-                      <ZoomOut className="w-5 h-5 text-white" />
+                      <ZoomOut className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </button>
-                    <span className="text-white text-sm font-sans min-w-[50px] text-center">
+                    <span className="text-white text-xs sm:text-sm font-sans min-w-[40px] sm:min-w-[50px] text-center">
                       {Math.round(zoomLevel * 100)}%
                     </span>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleZoomIn(); }}
-                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
                       title="Zoom In (+)"
                     >
-                      <ZoomIn className="w-5 h-5 text-white" />
+                      <ZoomIn className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); handleResetZoom(); }}
-                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
                       title="Reset Zoom (0)"
                     >
-                      <RotateCcw className="w-5 h-5 text-white" />
+                      <RotateCcw className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </button>
-                    <div className="w-px h-8 bg-white/20 mx-2" />
+                    <div className="w-px h-6 sm:h-8 bg-white/20 mx-1 sm:mx-2" />
                   </>
                 )}
                 {/* Download */}
                 {settings.allow_downloads && (
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDownload(); }}
-                    className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
                     title="Download"
                   >
-                    <Download className="w-5 h-5 text-white" />
+                    <Download className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </button>
                 )}
                 {/* Share dropdown */}
                 {settings.allow_share && (
-                  <div className="relative">
+                  <div className="relative shrink-0">
                     <button
                       onClick={(e) => { e.stopPropagation(); setShareMenuOpen((o) => !o); }}
-                      className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
                       title="Share"
                     >
-                      <Share2 className="w-5 h-5 text-white" />
+                      <Share2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </button>
                     {shareMenuOpen && (
                       <>
@@ -1142,36 +1147,36 @@ export default function GalleryPage() {
                   </div>
                 )}
                 {(settings.allow_downloads || settings.allow_share) && (
-                  <div className="w-px h-8 bg-white/20 mx-2" />
+                  <div className="w-px h-6 sm:h-8 bg-white/20 mx-1 sm:mx-2" />
                 )}
                 {/* Slideshow Toggle */}
                 {settings.allow_slideshow && (
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleSlideshow(); }}
-                    className={`w-10 h-10 rounded-full backdrop-blur-sm flex items-center justify-center transition-colors ${
+                    className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full backdrop-blur-sm flex items-center justify-center transition-colors shrink-0 ${
                       isSlideshow ? 'bg-rose-500' : 'bg-white/10 hover:bg-white/20'
                     }`}
                     title="Toggle Slideshow (Space)"
                   >
-                    {isSlideshow ? <Pause className="w-5 h-5 text-white" /> : <Play className="w-5 h-5 text-white" />}
+                    {isSlideshow ? <Pause className="w-4 h-4 sm:w-5 sm:h-5 text-white" /> : <Play className="w-4 h-4 sm:w-5 sm:h-5 text-white" />}
                   </button>
                 )}
                 {/* Fullscreen */}
                 {settings.allow_fullscreen && (
                   <button
                     onClick={(e) => { e.stopPropagation(); toggleFullscreen(); }}
-                    className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+                    className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
                     title="Toggle Fullscreen (F)"
                   >
-                    {isFullscreen ? <Minimize2 className="w-5 h-5 text-white" /> : <Maximize2 className="w-5 h-5 text-white" />}
+                    {isFullscreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5 text-white" />}
                   </button>
                 )}
                 {/* Close */}
                 <button
                   onClick={closeLightbox}
-                  className="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors shrink-0"
                 >
-                  <X className="w-5 h-5 text-white" />
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </button>
               </div>
             </div>
@@ -1182,28 +1187,28 @@ export default function GalleryPage() {
                 e.stopPropagation();
                 goToPrevious();
               }}
-              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="absolute left-1 sm:left-2 md:left-4 lg:left-6 top-1/2 -translate-y-1/2 z-50 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors shadow-lg"
             >
-              <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
             </button>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 goToNext();
               }}
-              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-50 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors"
+              className="absolute right-1 sm:right-2 md:right-4 lg:right-6 top-1/2 -translate-y-1/2 z-50 w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center hover:bg-white/30 transition-colors shadow-lg"
             >
-              <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+              <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
             </button>
 
             {/* Image Container with Zoom & Pan + Touch Gestures */}
             <motion.div
               key={selectedPhoto}
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              className="relative max-w-[94vw] sm:max-w-[90vw] max-h-[78vh] sm:max-h-[85vh] overflow-hidden touch-none mt-16 sm:mt-14 mb-28 sm:mb-24"
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.25 }}
+              className="relative w-full max-w-[96vw] sm:max-w-[92vw] md:max-w-[88vw] lg:max-w-[85vw] h-[70vh] sm:h-[75vh] md:h-[80vh] lg:h-[82vh] flex items-center justify-center overflow-hidden touch-none px-2 sm:px-4"
               onClick={(e) => e.stopPropagation()}
               ref={imageContainerRef}
               onTouchStart={handleTouchStart}
@@ -1211,10 +1216,10 @@ export default function GalleryPage() {
               onTouchEnd={handleTouchEnd}
             >
               <div
-                className={`relative ${isMobile ? '' : 'cursor-move'} ${isSlideshow ? 'animate-ken-burns' : ''}`}
+                className={`relative w-full h-full flex items-center justify-center ${isMobile ? '' : 'cursor-move'} ${isSlideshow ? 'animate-ken-burns' : ''}`}
                 style={{
                   transform: `translate(${panPosition.x}px, ${panPosition.y}px) scale(${zoomLevel})`,
-                  transition: isDragging ? 'none' : 'transform 0.3s ease-out',
+                  transition: isDragging ? 'none' : 'transform 0.25s ease-out',
                 }}
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
@@ -1226,10 +1231,10 @@ export default function GalleryPage() {
                   alt={filteredPhotos[selectedPhoto].alt}
                   width={1200}
                   height={1600}
-                  className="max-w-full max-h-[58vh] sm:max-h-[70vh] object-contain rounded-lg select-none"
+                  className="max-w-full max-h-full w-auto h-auto object-contain rounded-lg sm:rounded-xl select-none"
                   referrerPolicy="no-referrer"
                   draggable={false}
-                  sizes="(max-width: 768px) 95vw, 80vw"
+                  sizes="(max-width: 640px) 96vw, (max-width: 768px) 92vw, (max-width: 1024px) 88vw, 85vw"
                 />
                 {showWatermark && (
                   <div className="absolute inset-0 pointer-events-none flex items-end justify-end p-4 md:p-6">
@@ -1244,10 +1249,10 @@ export default function GalleryPage() {
               {settings.allow_favorites && (
                 <button
                   onClick={() => toggleFavorite(filteredPhotos[selectedPhoto].id)}
-                  className="absolute top-3 right-3 sm:top-4 sm:right-4 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors"
+                  className="absolute top-2 right-2 sm:top-3 sm:right-3 md:top-4 md:right-4 w-9 h-9 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center hover:bg-white/40 transition-colors shadow-lg"
                 >
                   <Heart
-                    className={`w-5 h-5 sm:w-6 sm:h-6 transition-colors ${
+                    className={`w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 transition-colors ${
                       favorites.includes(filteredPhotos[selectedPhoto].id)
                         ? 'text-rose-400 fill-rose-400'
                         : 'text-white'
@@ -1257,20 +1262,20 @@ export default function GalleryPage() {
               )}
             </motion.div>
 
-            {/* Image Info - Outside image container, above thumbnails */}
-            <div className="absolute bottom-20 left-3 right-3 sm:bottom-24 sm:left-4 sm:right-4 md:left-8 md:right-auto md:max-w-md">
-              <div className="bg-black/60 backdrop-blur-md rounded-xl px-4 sm:px-5 py-2.5 sm:py-3 border border-white/10">
-                <h3 className="text-white font-serif text-base sm:text-lg md:text-xl">
+            {/* Image Info - Better responsive positioning */}
+            <div className="absolute bottom-16 sm:bottom-20 md:bottom-24 left-2 right-2 sm:left-4 sm:right-4 md:left-6 md:right-auto md:max-w-sm lg:max-w-md">
+              <div className="bg-black/60 backdrop-blur-md rounded-lg sm:rounded-xl px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 border border-white/10">
+                <h3 className="text-white font-serif text-sm sm:text-base md:text-lg lg:text-xl truncate">
                   {filteredPhotos[selectedPhoto].alt}
                 </h3>
-                <p className="text-white/60 text-xs uppercase tracking-widest font-sans mt-1">
+                <p className="text-white/60 text-[10px] sm:text-xs uppercase tracking-widest font-sans mt-0.5 sm:mt-1">
                   {filteredPhotos[selectedPhoto].category}
                 </p>
               </div>
             </div>
 
-            {/* Thumbnail Strip - Better positioned */}
-            <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex gap-2 max-w-[94vw] sm:max-w-[85vw] overflow-x-auto px-3 sm:px-4 py-2 scrollbar-hide bg-black/40 backdrop-blur-sm rounded-2xl border border-white/10">
+            {/* Thumbnail Strip - Responsive sizing */}
+            <div className="absolute bottom-1 sm:bottom-2 md:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2 md:gap-3 max-w-[96vw] sm:max-w-[90vw] md:max-w-[85vw] overflow-x-auto px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 scrollbar-hide bg-black/50 backdrop-blur-sm rounded-xl sm:rounded-2xl border border-white/10">
               {filteredPhotos.map((photo, index) => (
                 <button
                   key={photo.id}
@@ -1281,7 +1286,7 @@ export default function GalleryPage() {
                     setPanPosition({ x: 0, y: 0 });
                     void ensureFullImageUrl(photo);
                   }}
-                  className={`flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 rounded-xl overflow-hidden transition-all border-2 ${
+                  className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-lg sm:rounded-xl overflow-hidden transition-all border-2 ${
                     selectedPhoto === index
                       ? 'border-white ring-2 ring-white/30'
                       : 'border-transparent opacity-60 hover:opacity-90'

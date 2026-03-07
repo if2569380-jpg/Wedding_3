@@ -225,7 +225,7 @@ const WEDDING_SECTIONS = [
     description: "Surrounded by our dearest family and friends, we promised to love and cherish each other for all the days of our lives. A day filled with joy and laughter.",
     color: "bg-[#ece8e1]",
     textColor: "text-stone-800",
-    image: "https://picsum.photos/seed/wedding3/1200/1600",
+    image: "https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/sign/gallery/full/82ebe6d4-d97a-44c1-b1cd-b6713c33b9d0-1772830623681.jfif?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9iMjVmMGY5MS0xY2M5LTQwOGEtOTM4MS04YTE2ZjViNDIyNjgiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJnYWxsZXJ5L2Z1bGwvODJlYmU2ZDQtZDk3YS00NGMxLWIxY2QtYjY3MTNjMzNiOWQwLTE3NzI4MzA2MjM2ODEuamZpZiIsImlhdCI6MTc3Mjg3NTc1MiwiZXhwIjoxNzcyODc5MzUyfQ.m6_okXkME_HL7kkh3y6Kv8tPKOPmLizzZ32TKS2SSp8",
     icon: <Calendar className="w-6 h-6 text-stone-500" />,
   },
   {
