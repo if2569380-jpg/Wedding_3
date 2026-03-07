@@ -31,7 +31,8 @@ const nextConfig: NextConfig = {
   // Keep default `.next` output so Vercel can find Next build artifacts.
   transpilePackages: ['motion'],
   turbopack: {
-    // Turbopack configuration for Next.js 16
+    // Pin workspace root so Turbopack does not infer from parent lockfiles.
+    root: process.cwd(),
   },
 };
 

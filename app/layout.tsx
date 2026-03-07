@@ -1,19 +1,7 @@
 import type {Metadata} from 'next';
-import { Manrope, Cormorant_Garamond } from 'next/font/google';
 import './globals.css';
 import { Analytics } from '@vercel/analytics/next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
-
-const manrope = Manrope({
-  subsets: ['latin'],
-  variable: '--font-sans',
-});
-
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-serif',
-});
 
 export const metadata: Metadata = {
   title: 'Eternal Love - Our Wedding Album',
@@ -22,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
-    <html lang="en" className={`${manrope.variable} ${cormorant.variable}`}>
+    <html lang="en">
       <body suppressHydrationWarning className="font-serif">
         {children}
         <Analytics />
