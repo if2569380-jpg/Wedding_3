@@ -144,7 +144,7 @@ function Navigation() {
                 }}
                 whileHover={{ scale: 1.02 }}
               >
-                Laboni <span className="text-rose-400 mx-1">&</span> Arif
+                {COUPLE_NAMES}
               </motion.h1>
             </Link>
 
@@ -300,6 +300,14 @@ const STORY_SECTION_ANCHORS: Record<number, string> = {
   2: 'portfolio',
 };
 
+const COUPLE_NAMES = 'Laboni & Adnan Arif';
+const HERO_EVENT_DATE = 'November 1, 2024';
+const HERO_HIGHLIGHTS = [
+  { icon: Calendar, label: 'Married', value: HERO_EVENT_DATE },
+  { icon: Images, label: 'Memories', value: 'A gallery of our favorite frames' },
+  { icon: Heart, label: 'Story', value: 'One promise, many beautiful chapters' },
+];
+
 function getNextNovemberFirstTarget(): string {
   const now = new Date();
   const currentYear = now.getUTCFullYear();
@@ -451,57 +459,133 @@ export default function Home() {
         {/* Hero Content with Parallax Fade */}
         <motion.div 
           style={{ opacity }}
-          className="relative z-20 text-center px-4 sm:px-6 max-w-4xl mx-auto"
+          className="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8"
         >
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.1 }}
-            className="text-xs sm:text-sm uppercase tracking-[0.14em] sm:tracking-[0.2em] text-white/90 font-sans font-semibold mb-5 sm:mb-6"
-            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
-          >
-            Laboni & Adnan Arif
-          </motion.p>
+          <div className="grid items-end gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-10">
+            <div className="text-center lg:text-left">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.08 }}
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-[11px] font-sans font-semibold uppercase tracking-[0.18em] text-white/90 backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.18)]"
+                style={{ textShadow: '0 2px 10px rgba(0,0,0,0.35)' }}
+              >
+                <span className="h-2 w-2 rounded-full bg-rose-300" />
+                Married on {HERO_EVENT_DATE}
+              </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.15 }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-white leading-[1.08] tracking-tight"
-            style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}
-          >
-            Turning Your Wedding Dreams
-            <span className="block italic font-normal mt-2">Into Ultimate Reality</span>
-          </motion.h1>
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.14 }}
+                className="mt-5 text-xs sm:text-sm uppercase tracking-[0.16em] sm:tracking-[0.22em] text-white/85 font-sans font-semibold"
+                style={{ textShadow: '0 2px 10px rgba(0,0,0,0.45)' }}
+              >
+                {COUPLE_NAMES}
+              </motion.p>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.3 }}
-            className="mt-6 sm:mt-8 text-sm sm:text-lg text-white/95 font-sans font-normal tracking-[0.01em] max-w-xl mx-auto leading-relaxed"
-            style={{ textShadow: '0 2px 15px rgba(0,0,0,0.5)' }}
-          >
-            Crafting every detail to shape your perfect wedding day with love and elegance.
-          </motion.p>
+              <motion.h1
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.18 }}
+                className="mt-4 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-white leading-[1.02] tracking-tight"
+                style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}
+              >
+                One November vow,
+                <span className="mt-3 block italic font-normal text-white/95">
+                  still glowing in every frame.
+                </span>
+              </motion.h1>
+
+              <motion.p
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.3 }}
+                className="mx-auto mt-6 max-w-2xl text-sm leading-relaxed text-white/92 sm:text-lg lg:mx-0"
+                style={{ textShadow: '0 2px 15px rgba(0,0,0,0.45)' }}
+              >
+                From the quiet first look to the loudest dance floor moment, this page now opens
+                more like a keepsake album and less like a generic wedding template.
+              </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.45, delay: 0.42 }}
+                className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row lg:justify-start"
+              >
+                <Link
+                  href="#about"
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-white/90 bg-white px-7 py-3.5 text-center text-sm font-bold tracking-[0.08em] text-stone-900 transition-all duration-300 hover:scale-[1.03] hover:bg-stone-100 sm:w-auto sm:px-10 sm:py-4 shadow-[0_12px_30px_rgba(0,0,0,0.28)]"
+                >
+                  READ OUR STORY
+                </Link>
+                <Link
+                  href="/gallery"
+                  className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl border border-white/50 bg-white/12 px-7 py-3.5 text-center text-sm font-semibold tracking-[0.08em] text-white backdrop-blur-md transition-all duration-300 hover:scale-[1.03] hover:bg-white/22 sm:w-auto sm:px-10 sm:py-4 shadow-[0_10px_25px_rgba(0,0,0,0.2)]"
+                >
+                  OPEN GALLERY
+                </Link>
+              </motion.div>
+            </div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.55, delay: 0.28 }}
+              className="hidden lg:block"
+            >
+              <div className="rounded-[2rem] border border-white/18 bg-white/12 p-6 backdrop-blur-xl shadow-[0_24px_80px_rgba(0,0,0,0.28)]">
+                <p className="text-[11px] uppercase tracking-[0.24em] text-white/70">Hero note</p>
+                <p className="mt-4 text-2xl font-serif leading-tight text-white">
+                  A softer opening, clearer CTAs, and more personal storytelling.
+                </p>
+                <div className="mt-6 space-y-3 border-t border-white/12 pt-5">
+                  {HERO_HIGHLIGHTS.map((item) => {
+                    const Icon = item.icon;
+                    return (
+                      <div
+                        key={item.label}
+                        className="flex items-start gap-3 rounded-2xl border border-white/10 bg-black/10 px-4 py-3"
+                      >
+                        <div className="mt-0.5 rounded-full bg-white/12 p-2">
+                          <Icon className="h-4 w-4 text-rose-200" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/60">{item.label}</p>
+                          <p className="mt-1 text-sm leading-relaxed text-white/90">{item.value}</p>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          </div>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.45 }}
-            className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto"
+            transition={{ duration: 0.45, delay: 0.52 }}
+            className="mt-8 grid gap-3 sm:grid-cols-3"
           >
-            <Link
-              href="#about"
-              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white text-stone-900 text-sm tracking-[0.08em] font-sans font-bold rounded-xl border border-white/80 hover:bg-stone-100 hover:scale-[1.03] transition-all duration-300 shadow-[0_12px_30px_rgba(0,0,0,0.28)]"
-            >
-              EXPLORE OUR STORY
-            </Link>
-            <Link
-              href="/gallery"
-              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white/20 backdrop-blur-md border border-white/60 text-white text-sm tracking-[0.08em] font-sans font-semibold rounded-xl hover:bg-white/28 hover:scale-[1.03] transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.2)]"
-            >
-              VIEW GALLERY
-            </Link>
+            {HERO_HIGHLIGHTS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div
+                  key={item.label}
+                  className="rounded-2xl border border-white/15 bg-white/10 px-4 py-4 text-left backdrop-blur-md shadow-[0_10px_30px_rgba(0,0,0,0.16)]"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="rounded-full bg-white/12 p-2">
+                      <Icon className="h-4 w-4 text-rose-200" />
+                    </div>
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-white/65">{item.label}</p>
+                  </div>
+                  <p className="mt-3 text-sm font-medium leading-relaxed text-white/92">{item.value}</p>
+                </div>
+              );
+            })}
           </motion.div>
         </motion.div>
 
@@ -628,7 +712,7 @@ export default function Home() {
           
           {/* Names */}
           <p className="text-xl sm:text-3xl font-medium italic mb-9 sm:mb-12" style={{ fontFamily: "'Dancing Script', cursive" }}>
-            Laboni & Adnan Arif
+            {COUPLE_NAMES}
           </p>
           
           {/* Decorative divider */}
