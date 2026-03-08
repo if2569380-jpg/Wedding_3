@@ -18,7 +18,7 @@ interface PolaroidPhoto {
 const polaroidPhotos: PolaroidPhoto[] = [
   {
     id: 1,
-    src: '/gallery/photo1.jpg',
+    src: 'https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/landing-public/collage/1772915075675-91429e08-5f6d-4f52-b7f5-4bb1dd4cd4d9.png',
     caption: 'The first look',
     rotation: -8,
     x: 5,
@@ -28,7 +28,7 @@ const polaroidPhotos: PolaroidPhoto[] = [
   },
   {
     id: 2,
-    src: '/gallery/photo2.jpg',
+    src: 'https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/landing-public/collage/aeafc8ba-0cba-45de-9cd3-a71fefcc1a29.jfif',
     caption: 'Details, weathered & wild',
     rotation: 3,
     x: 35,
@@ -38,7 +38,7 @@ const polaroidPhotos: PolaroidPhoto[] = [
   },
   {
     id: 3,
-    src: '/gallery/photo3.jpg',
+    src: 'https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/landing-public/collage/bbb683c6-89f5-4b83-8876-784782fb3e4a.jfif',
     caption: 'The whole crew',
     rotation: 5,
     x: 65,
@@ -48,7 +48,7 @@ const polaroidPhotos: PolaroidPhoto[] = [
   },
   {
     id: 4,
-    src: '/gallery/photo4.jpg',
+    src: 'https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/landing-public/collage/1772916258195-675158db-9380-410e-91c4-9a4da4f0a196.jfif',
     caption: 'The trembling lip',
     rotation: -4,
     x: 10,
@@ -58,7 +58,7 @@ const polaroidPhotos: PolaroidPhoto[] = [
   },
   {
     id: 5,
-    src: '/gallery/photo5.jpg',
+    src: 'https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/landing-public/collage/1772916240828-424a626d-93cf-41af-87bd-b05e485b182f.webp',
     caption: 'Lights & laughter',
     rotation: 7,
     x: 40,
@@ -68,7 +68,7 @@ const polaroidPhotos: PolaroidPhoto[] = [
   },
   {
     id: 6,
-    src: '/gallery/photo6.jpg',
+    src: 'https://yxcirytftaeyokldsphx.supabase.co/storage/v1/object/public/landing-public/collage/1772915075675-91429e08-5f6d-4f52-b7f5-4bb1dd4cd4d9.png',
     caption: 'Lavender & candlelight',
     rotation: -2,
     x: 70,

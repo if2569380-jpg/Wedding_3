@@ -339,8 +339,7 @@ export default function Home() {
   return (
     <main className="relative antialiased selection:bg-rose-100 selection:text-rose-900">
       {/* Hero Section with Parallax */}
-      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden">
-        {/* Background Image with Parallax */}
+      <section className="relative min-h-screen flex flex-col items-center justify-center overflow-hidden bg-stone-950">
         <motion.div
           initial={{ opacity: 0, scale: 1.1 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -360,67 +359,70 @@ export default function Home() {
               referrerPolicy="no-referrer"
             />
           </motion.div>
-          {/* Stronger Overlay for better contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/40 to-black/60 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-stone-950/78 via-black/58 to-stone-950/82 z-10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/45 via-transparent to-black/30 z-10" />
         </motion.div>
 
         <Navigation />
 
-        {/* Hero Content with Parallax Fade */}
         <motion.div 
           style={{ opacity }}
-          className="relative z-20 text-center px-4 sm:px-6 max-w-4xl mx-auto"
+          className="relative z-20 w-full max-w-5xl mx-auto px-4 sm:px-6"
         >
-          <motion.p
+          <div className="mx-auto max-w-4xl text-center">
+            <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.1 }}
-            className="text-xs sm:text-sm uppercase tracking-[0.14em] sm:tracking-[0.2em] text-white/90 font-sans font-semibold mb-5 sm:mb-6"
-            style={{ textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}
+            className="inline-flex items-center justify-center rounded-full border border-white/18 bg-black/18 px-4 py-2 text-[11px] sm:text-xs uppercase tracking-[0.22em] text-white/92 font-sans font-semibold mb-5 sm:mb-7 backdrop-blur-sm"
           >
             Laboni & Adnan Arif
-          </motion.p>
+            </motion.p>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55, delay: 0.15 }}
-            className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-medium text-white leading-[1.08] tracking-tight"
-            style={{ textShadow: '0 4px 30px rgba(0,0,0,0.6)' }}
-          >
-            Turning Your Wedding Dreams
-            <span className="block italic font-normal mt-2">Into Ultimate Reality</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.3 }}
-            className="mt-6 sm:mt-8 text-sm sm:text-lg text-white/95 font-sans font-normal tracking-[0.01em] max-w-xl mx-auto leading-relaxed"
-            style={{ textShadow: '0 2px 15px rgba(0,0,0,0.5)' }}
-          >
-            Crafting every detail to shape your perfect wedding day with love and elegance.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.45 }}
-            className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full sm:w-auto"
-          >
-            <Link
-              href="#about"
-              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white text-stone-900 text-sm tracking-[0.08em] font-sans font-bold rounded-xl border border-white/80 hover:bg-stone-100 hover:scale-[1.03] transition-all duration-300 shadow-[0_12px_30px_rgba(0,0,0,0.28)]"
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55, delay: 0.15 }}
+              className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif font-semibold leading-[1.02] tracking-tight text-white"
+              style={{ textShadow: '0 12px 36px rgba(0,0,0,0.55)' }}
             >
-              EXPLORE OUR STORY
-            </Link>
-            <Link
-              href="/gallery"
-              className="w-full sm:w-auto text-center px-7 sm:px-10 py-3.5 sm:py-4 bg-white/20 backdrop-blur-md border border-white/60 text-white text-sm tracking-[0.08em] font-sans font-semibold rounded-xl hover:bg-white/28 hover:scale-[1.03] transition-all duration-300 shadow-[0_10px_25px_rgba(0,0,0,0.2)]"
+              Turning Your Wedding Dreams
+              <span className="mt-2 block text-white italic font-medium">
+                Into Ultimate Reality
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.3 }}
+              className="mt-6 sm:mt-8 max-w-2xl mx-auto text-sm sm:text-lg leading-relaxed text-white/88 font-sans"
+              style={{ textShadow: '0 6px 20px rgba(0,0,0,0.42)' }}
             >
-              VIEW GALLERY
-            </Link>
-          </motion.div>
+              Crafting every detail to shape your perfect wedding day with love,
+              elegance, and a story worth remembering.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.45 }}
+              className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4"
+            >
+              <Link
+                href="#about"
+                className="w-full sm:w-auto rounded-full bg-white px-7 sm:px-9 py-3.5 text-center text-sm font-semibold tracking-[0.12em] text-stone-900 transition-all duration-300 hover:bg-stone-100 hover:scale-[1.02] shadow-[0_14px_32px_rgba(0,0,0,0.28)]"
+              >
+                EXPLORE STORY
+              </Link>
+              <Link
+                href="/gallery"
+                className="w-full sm:w-auto rounded-full border border-white/45 bg-white/10 px-7 sm:px-9 py-3.5 text-center text-sm font-semibold tracking-[0.12em] text-white backdrop-blur-sm transition-all duration-300 hover:bg-white/16 hover:scale-[1.02]"
+              >
+                VIEW GALLERY
+              </Link>
+            </motion.div>
+          </div>
         </motion.div>
 
         <FloralDivider />
